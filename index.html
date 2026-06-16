@@ -148,7 +148,19 @@
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + id).classList.add('active');
-            if(event) event.currentTarget.classList.add('active');
+            
+            // Perbaikan deteksi tombol aktif agar tidak error saat diklik
+            if(event && event.currentTarget) {
+                event.currentTarget.classList.add('active');
+            } else {
+                // Fallback jika dipanggil otomatis oleh sistem tanpa click event asli
+                let buttons = document.querySelectorAll('.tab-btn');
+                buttons.forEach(btn => {
+                    if(btn.innerText === id.toUpperCase() || (id==='bab' && btn.innerText==='DATABASE BAB')) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
         }
 
         // AMBIL DATA META VERSI
@@ -163,75 +175,4 @@
             let kat = document.getElementById(selId).value, isi = document.getElementById(txtId).value;
             if(!isi.trim()) return alert("Isi data kosong!");
             database.ref('wiki/' + node).push({ kategori: kat, konten: isi, waktu: new Date().toLocaleString('id-ID') }, err => {
-                if(!err) { alert("Sukses!"); document.getElementById(txtId).value = ""; }
-            });
-        }
-
-        function simpanKarakter() {
-            let nama = document.getElementById("charNama").value, riwayat = document.getElementById("charRiwayat").value;
-            if(!nama || !riwayat) return alert("Lengkapi nama & riwayat!");
-            database.ref('wiki/karakter').push({
-                jenis: document.getElementById("charJenis").value, nama, status: document.getElementById("charStatus").value,
-                afiliasi: document.getElementById("charAfiliasi").value, skill: document.getElementById("charKemampuan").value, riwayat
-            }, err => { if(!err) { alert("Tersimpan!"); document.querySelectorAll('#tab-karakter input, #tab-karakter textarea').forEach(i => i.value=""); } });
-        }
-
-        function simpanOrganisasi() {
-            let nama = document.getElementById("orgNama").value, sejarah = document.getElementById("orgSejarah").value;
-            database.ref('wiki/organisasi').push({ nama, sejarah, tujuan: document.getElementById("orgTujuan").value, anggota: document.getElementById("orgAnggota").value }, err => {
-                if(!err) { alert("Tersimpan!"); document.getElementById("orgSejarah").value=""; document.getElementById("orgTujuan").value=""; document.getElementById("orgAnggota").value=""; }
-            });
-        }
-
-        function simpanBabSpesifik() {
-            let no = document.getElementById("babNomor").value, judul = document.getElementById("babJudul").value;
-            if(!no || !judul) return alert("Nomor & Judul wajib!");
-            database.ref('wiki/database_bab').push({ no, judul, ringkasan: document.getElementById("babRingkasan").value, karakter: document.getElementById("babChar").value, eventPenting: document.getElementById("babEvent").value }, err => {
-                if(!err) { alert("Log Dicatat!"); document.querySelectorAll('#tab-bab input, #tab-bab textarea').forEach(i => i.value=""); }
-            });
-        }
-
-        // ENGINE REALTIME DATA RENDERER LISTENER
-        function setupListener(nodePath, targetId, renderType) {
-            database.ref('wiki/' + nodePath).on('value', snapshot => {
-                let data = snapshot.val(), html = "", container = document.getElementById(targetId);
-                if (!data) { 
-                    container.innerHTML = "<p style='color:#71717a;'>Belum ada data.</p>";
-                    if(nodePath==='database_bab') document.getElementById("statBab").innerText = 0;
-                    if(nodePath==='karakter') document.getElementById("statChar").innerText = 0;
-                    return; 
-                }
-                let keys = Object.keys(data);
-                if(nodePath==='database_bab') document.getElementById("statBab").innerText = keys.length;
-                if(nodePath==='karakter') document.getElementById("statChar").innerText = keys.length;
-
-                keys.forEach(key => {
-                    let item = data[key]; html += `<div class="render-item">`;
-                    if (renderType === 'umum') {
-                        html += `<span class="meta-tag">${item.kategori}</span><p style="white-space:pre-wrap; margin-top:5px;">${item.konten}</p>`;
-                    } else if (renderType === 'karakter') {
-                        html += `<h3>${item.nama} <span style="font-size:0.8rem; color:#ff6600;">[${item.jenis}]</span></h3><p>Status: ${item.status} | Fraksi: ${item.afiliasi}</p><p>Skill: ${item.skill}</p><p style="background:#18181c; padding:8px; border-radius:5px; margin-top:5px;">${item.riwayat}</p>`;
-                    } else if (renderType === 'organisasi') {
-                        html += `<h3>🏛️ ${item.nama}</h3><p>Visi: ${item.tujuan}</p><p>Anggota: ${item.anggota}</p><p style="color:#d0d0d5;">Sejarah: ${item.sejarah}</p>`;
-                    } else if (renderType === 'bab') {
-                        html += `<h3>Bab ${item.no}: ${item.judul}</h3><p>Karakter: ${item.karakter}</p><p>Peristiwa: <span style="color:#ff6600;">${item.eventPenting}</span></p><p style="background:#18181c; padding:8px; border-radius:5px; margin-top:5px;">${item.ringkasan}</p>`;
-                    }
-                    html += `<div style="text-align:right; margin-top:8px;"><button class="btn-danger" onclick="hapusItem('${nodePath}/${key}')">Hapus</button></div></div>`;
-                });
-                container.innerHTML = html;
-            });
-        }
-
-        function hapusItem(path) { if(confirm("Hapus data dari cloud?")) database.ref('wiki/' + path).remove(); }
-
-        // NYALAKAN SEMUA LISTENER SINKRONISASI DATABASE CLOUD
-        susunanTab.forEach(tab => {
-            if(tab.id !== "beranda") {
-                let type = (tab.id==='karakter'||tab.id==='organisasi'||tab.id==='bab') ? tab.id : 'umum';
-                let path = tab.id === 'bab' ? 'database_bab' : tab.id;
-                setupListener(path, 'list-' + tab.id, type);
-            }
-        });
-    </script>
-</body>
-                                                                                 </html>
+                if(!err) { alert("Sukses!"); document.getElementById(txtId).value =
