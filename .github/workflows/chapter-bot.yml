@@ -4,12 +4,54 @@ on:
   issues:
     types: [opened]
 
+permissions:
+  contents: write
+  issues: read
+
 jobs:
-  test:
+  update-database:
+
     runs-on: ubuntu-latest
 
     steps:
-      - name: Print Issue
+      - name: Ambil repository
+        uses: actions/checkout@v4
+
+      - name: Siapkan Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Tambahkan bab ke database
         run: |
-          echo "${{ github.event.issue.title }}"
-          echo "${{ github.event.issue.body }}"
+          python <<EOF
+          import json
+
+          file = "chapters.json"
+
+          try:
+              with open(file, "r", encoding="utf-8") as f:
+                  chapters = json.load(f)
+          except:
+              chapters = []
+
+          new_chapter = {
+              "title": "${{ github.event.issue.title }}",
+              "content": """${{ github.event.issue.body }}"""
+          }
+
+          chapters.append(new_chapter)
+
+          with open(file, "w", encoding="utf-8") as f:
+              json.dump(chapters, f, indent=2, ensure_ascii=False)
+
+          EOF
+
+      - name: Simpan perubahan
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+
+          git add chapters.json
+          git commit -m "Tambah bab baru otomatis"
+          git push
