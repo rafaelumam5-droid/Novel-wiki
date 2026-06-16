@@ -17,7 +17,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 
     <script>
-        // KONFIGURASI FIREBASE ASLI ANDA (SUDAH DIPERBAIKI STRUKTURNYA)
+        // KONFIGURASI FIREBASE (SUDAH DISESUAIKAN DENGAN SCREENSHOT KONSOL ANDA)
         const firebaseConfig = {
             apiKey: "AIzaSyBw4nrBcyiIO6Kic8y26GIXQ8plK8aQouw",
             authDomain: "wiki-novel.firebaseapp.com",
@@ -25,11 +25,11 @@
             projectId: "wiki-novel",
             storageBucket: "wiki-novel.firebasestorage.app",
             messagingSenderId: "35934478405",
-            appId: "1:35934478405:web:b895bcbc73c321dac1432c",
+            appId: "1:35934478405:web:644e00c8724835d9c1432c", // ID Aplikasi yang benar
             measurementId: "G-97J07XT168"
         };
 
-        // Inisialisasi Firebase menggunakan format Compat agar sinkron dengan script di atas
+        // Inisialisasi Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
     </script>
@@ -192,7 +192,11 @@
         }
 
         function simpanKeCloud(path, data) {
-            database.ref(path).set(data);
+            database.ref(path).set(data, (error) => {
+                if (error) {
+                    alert("Gagal menyimpan ke Cloud: " + error.message);
+                }
+            });
         }
 
         function tambahBab(){
