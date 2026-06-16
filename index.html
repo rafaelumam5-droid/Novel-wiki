@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Novel Wiki</title>
+    <title>📚 WIKI NOVEL DATABASE</title>
 
     <script>
         var password = prompt("Masukkan Kata Sandi untuk Melihat Konten:");
@@ -17,421 +17,282 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 
     <script>
-        // Menggunakan data asli dari screenshot Anda
+        // Konfigurasi Firebase asli dari akun Anda
         const firebaseConfig = {
-            apiKey: "AIzaSyBw4nrBcyiIO6Kic8y26GIXQ8p...", // Kode api Anda
+            apiKey: "AIzaSyBw4nrBcyiIO6Kic8y26GIXQ8p...", 
             authDomain: "wiki-novel.firebaseapp.com",
             databaseURL: "https://wiki-novel-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "wiki-novel",
             storageBucket: "wiki-novel.firebasestorage.app",
             messagingSenderId: "35934478405",
-            appId: "1:35934478405:web:b895bcbc73c321..." // Kode appId Anda
+            appId: "1:35934478405:web:b895bcbc73c321..." 
         };
 
         // Inisialisasi Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
     </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background: #0f0f0f;
+            color: white;
+        }
+        header {
+            background: #181818;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #333;
+        }
+        header h1 {
+            color: #ffffff;
+        }
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            padding: 20px;
+        }
+        .card {
+            background: #1a1a1a;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border: 1px solid #333;
+        }
+        h2 {
+            margin-bottom: 10px;
+        }
+        input, textarea {
+            width: 100%;
+            background: #111;
+            color: white;
+            border: 1px solid #444;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        button {
+            background: #444;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 2px;
+        }
+        button:hover {
+            background: #666;
+        }
+        .bab, .character {
+            padding: 10px;
+            margin-top: 10px;
+            background: #151515;
+            border-radius: 5px;
+            border: 1px solid #333;
+        }
+        .stat {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .box {
+            flex: 1;
+            min-width: 150px;
+            background: #161616;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        a {
+            color: #7db4ff;
+            text-decoration: none;
+        }
+    </style>
 </head>
 <body>
 
-    <h1>Selamat Datang di Novel Wiki</h1>
-    <p>Ini adalah konten rahasia Anda...</p>
+    <header>
+        <h1>📚 WIKI NOVEL DATABASE</h1>
+        <p>Memulai Hidup Baru di Dunia Lain</p>
+    </header>
 
-    <div id="konten-novel" style="white-space: pre-wrap; padding: 15px; border: 1px solid #ccc; margin-top: 20px;">
-        Memuat isi novel dari cloud...
+    <div class="container">
+        <div class="card">
+            <h2>Dashboard</h2>
+            <div class="stat">
+                <div class="box">
+                    <h3 id="babCount">0</h3>
+                    <p>Total Bab</p>
+                </div>
+                <div class="box">
+                    <h3 id="charCount">0</h3>
+                    <p>Karakter</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🤖 ChatGPT</h2>
+            <a href="https://chatgpt.com" target="_blank">
+                <button>Buka ChatGPT</button>
+            </a>
+        </div>
+
+        <div class="card">
+            <h2>➕ Tambah Bab</h2>
+            <input type="text" id="judulBab" placeholder="Judul Bab">
+            <textarea id="isiBab" rows="8" placeholder="Tulis isi bab..."></textarea>
+            <button onclick="tambahBab()">Simpan Bab</button>
+        </div>
+
+        <div class="card">
+            <h2>📖 Daftar Bab</h2>
+            <div id="daftarBab">Memuat data bab dari cloud...</div>
+        </div>
+
+        <div class="card">
+            <h2>👤 Tambah Karakter</h2>
+            <input type="text" id="namaKarakter" placeholder="Nama Karakter">
+            <textarea id="infoKarakter" placeholder="Deskripsi karakter"></textarea>
+            <button onclick="tambahKarakter()">Simpan Karakter</button>
+        </div>
+
+        <div class="card">
+            <h2>👥 Database Karakter</h2>
+            <div id="karakterList">Memuat data karakter dari cloud...</div>
+        </div>
     </div>
 
     <script>
-        // Mengambil data dari Firebase secara otomatis saat web dibuka
-        database.ref('novel/konten').on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (snapshot.exists() && data.isi) {
-                // Tampilkan teks novel ke kotak di atas
-                document.getElementById("konten-novel").innerText = data.isi;
-            } else {
-                document.getElementById("konten-novel").innerText = "Belum ada isi novel yang tersimpan di cloud database.";
-            }
+        let bab = [];
+        let karakter = [];
+
+        // Langsung dengarkan perubahan data Bab di Firebase secara Realtime
+        database.ref('wiki/bab').on('value', (snapshot) => {
+            bab = snapshot.val() || [];
+            tampilkanBab();
         });
 
-        // FUNGSI UNTUK MENYIMPAN/MENGUBAH NOVEL KELAK
-        // Anda bisa memanggil fungsi ini lewat tombol "Simpan" jika nanti Anda membuatnya
-        function simpanNovelKeCloud(teksBaru) {
-            database.ref('novel/konten').set({
-                isi: teksBaru,
-                terakhirDiupdate: new Date().toString()
-            }).then(() => {
-                alert("Berhasil menyimpan ke Cloud Database!");
-            }).catch((error) => {
-                alert("Gagal menyimpan: " + error.message);
-            });
+        // Langsung dengarkan perubahan data Karakter di Firebase secara Realtime
+        database.ref('wiki/karakter').on('value', (snapshot) => {
+            karakter = snapshot.val() || [];
+            tampilkanKarakter();
+        });
+
+        function updateDashboard(){
+            document.getElementById("babCount").innerText = bab.length;
+            document.getElementById("charCount").innerText = karakter.length;
+        }
+
+        function simpanKeCloud(path, data) {
+            database.ref(path).set(data);
+        }
+
+        function tambahBab(){
+            let judul = document.getElementById("judulBab").value;
+            let isi = document.getElementById("isiBab").value;
+
+            if(judul=="" || isi==""){
+                alert("Isi semua data!");
+                return;
+            }
+
+            bab.push({ judul: judul, isi: isi });
+            simpanKeCloud('wiki/bab', bab);
+
+            document.getElementById("judulBab").value="";
+            document.getElementById("isiBab").value="";
+        }
+
+        function tampilkanBab(){
+            let html="";
+            if(bab.length === 0) {
+                html = "<p>Belum ada bab di database cloud.</p>";
+            } else {
+                bab.forEach((b, index)=>{
+                    if(b) { // Validasi jika ada data kosong/null
+                        html+= `
+                        <div class="bab">
+                            <h3>${b.judul}</h3>
+                            <p>${b.isi.replace(/\n/g,"<br>")}</p>
+                            <button onclick="editBab(${index})">Edit</button>
+                            <button onclick="hapusBab(${index})">Hapus</button>
+                        </div>`;
+                    }
+                });
+            }
+            document.getElementById("daftarBab").innerHTML = html;
+            updateDashboard();
+        }
+
+        function hapusBab(index){
+            if(confirm("Hapus bab ini dari cloud?")){
+                bab.splice(index, 1);
+                simpanKeCloud('wiki/bab', bab);
+            }
+        }
+
+        function editBab(index){
+            let judul = prompt("Edit Judul", bab[index].judul);
+            if(judul===null) return;
+
+            let isi = prompt("Edit Isi", bab[index].isi);
+            if(isi===null) return;
+
+            bab[index].judul = judul;
+            bab[index].isi = isi;
+
+            simpanKeCloud('wiki/bab', bab);
+        }
+
+        function tambahKarakter(){
+            let nama = document.getElementById("namaKarakter").value;
+            let info = document.getElementById("infoKarakter").value;
+
+            if(nama=="" || info==""){
+                alert("Isi semua data!");
+                return;
+            }
+
+            karakter.push({ nama: nama, info: info });
+            simpanKeCloud('wiki/karakter', karakter);
+
+            document.getElementById("namaKarakter").value="";
+            document.getElementById("infoKarakter").value="";
+        }
+
+        function tampilkanKarakter(){
+            let html="";
+            if(karakter.length === 0) {
+                html = "<p>Belum ada karakter di database cloud.</p>";
+            } else {
+                karakter.forEach((k, index)=>{
+                    if(k) { // Validasi jika ada data kosong/null
+                        html+= `
+                        <div class="character">
+                            <h3>${k.nama}</h3>
+                            <p>${k.info.replace(/\n/g,"<br>")}</p>
+                            <button onclick="hapusKarakter(${index})">Hapus</button>
+                        </div>`;
+                    }
+                });
+            }
+            document.getElementById("karakterList").innerHTML = html;
+            updateDashboard();
+        }
+
+        function hapusKarakter(index){
+            if(confirm("Hapus karakter ini dari cloud?")){
+                karakter.splice(index, 1);
+                simpanKeCloud('wiki/karakter', karakter);
+            }
         }
     </script>
-
 </body>
 </html>
-
-
-<style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial, sans-serif;
-}
-
-body{
-    background:#0f0f0f;
-    color:white;
-}
-
-header{
-    background:#181818;
-    padding:20px;
-    text-align:center;
-    border-bottom:1px solid #333;
-}
-
-header h1{
-    color:#ffffff;
-}
-
-.container{
-    max-width:1000px;
-    margin:auto;
-    padding:20px;
-}
-
-.card{
-    background:#1a1a1a;
-    padding:15px;
-    margin-bottom:15px;
-    border-radius:10px;
-    border:1px solid #333;
-}
-
-h2{
-    margin-bottom:10px;
-}
-
-input, textarea{
-    width:100%;
-    background:#111;
-    color:white;
-    border:1px solid #444;
-    padding:10px;
-    margin-bottom:10px;
-    border-radius:5px;
-}
-
-button{
-    background:#444;
-    color:white;
-    border:none;
-    padding:10px 15px;
-    border-radius:5px;
-    cursor:pointer;
-    margin:2px;
-}
-
-button:hover{
-    background:#666;
-}
-
-.bab{
-    padding:10px;
-    margin-top:10px;
-    background:#151515;
-    border-radius:5px;
-    border:1px solid #333;
-}
-
-.stat{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-}
-
-.box{
-    flex:1;
-    min-width:150px;
-    background:#161616;
-    padding:15px;
-    border-radius:10px;
-    text-align:center;
-}
-
-a{
-    color:#7db4ff;
-    text-decoration:none;
-}
-
-.character{
-    background:#151515;
-    padding:10px;
-    margin-top:10px;
-    border-radius:5px;
-}
-</style>
-
-</head>
-<body>
-
-<header>
-<h1>📚 WIKI NOVEL DATABASE</h1>
-<p>Memulai Hidup Baru di Dunia Lain</p>
-</header>
-
-<div class="container">
-
-<div class="card">
-<h2>Dashboard</h2>
-
-<div class="stat">
-<div class="box">
-<h3 id="babCount">0</h3>
-<p>Total Bab</p>
-</div>
-
-<div class="box">
-<h3 id="charCount">0</h3>
-<p>Karakter</p>
-</div>
-</div>
-</div>
-
-<div class="card">
-<h2>🤖 ChatGPT</h2>
-
-<a href="https://chatgpt.com" target="_blank">
-<button>Buka ChatGPT</button>
-</a>
-
-</div>
-
-<div class="card">
-<h2>➕ Tambah Bab</h2>
-
-<input type="text" id="judulBab" placeholder="Judul Bab">
-
-<textarea id="isiBab" rows="8"
-placeholder="Tulis isi bab..."></textarea>
-
-<button onclick="tambahBab()">Simpan Bab</button>
-
-</div>
-
-<div class="card">
-<h2>📖 Daftar Bab</h2>
-<div id="daftarBab"></div>
-</div>
-
-<div class="card">
-<h2>👤 Tambah Karakter</h2>
-
-<input type="text" id="namaKarakter"
-placeholder="Nama Karakter">
-
-<textarea id="infoKarakter"
-placeholder="Deskripsi karakter"></textarea>
-
-<button onclick="tambahKarakter()">
-Simpan Karakter
-</button>
-
-</div>
-
-<div class="card">
-<h2>👥 Database Karakter</h2>
-<div id="karakterList"></div>
-</div>
-
-</div>
-
-<script>
-
-let bab =
-JSON.parse(localStorage.getItem("bab")) || [];
-
-let karakter =
-JSON.parse(localStorage.getItem("karakter")) || [];
-
-function updateDashboard(){
-document.getElementById("babCount").innerText =
-bab.length;
-
-document.getElementById("charCount").innerText =
-karakter.length;
-}
-
-function simpan(){
-localStorage.setItem("bab",
-JSON.stringify(bab));
-
-localStorage.setItem("karakter",
-JSON.stringify(karakter));
-}
-
-function tambahBab(){
-
-let judul =
-document.getElementById("judulBab").value;
-
-let isi =
-document.getElementById("isiBab").value;
-
-if(judul=="" || isi==""){
-alert("Isi semua data!");
-return;
-}
-
-bab.push({
-judul:judul,
-isi:isi
-});
-
-simpan();
-tampilkanBab();
-
-document.getElementById("judulBab").value="";
-document.getElementById("isiBab").value="";
-}
-
-function tampilkanBab(){
-
-let html="";
-
-bab.forEach((b,index)=>{
-
-html+=`
-<div class="bab">
-<h3>${b.judul}</h3>
-<p>${b.isi.replace(/\n/g,"<br>")}</p>
-
-<button onclick="editBab(${index})">
-Edit
-</button>
-
-<button onclick="hapusBab(${index})">
-Hapus
-</button>
-
-</div>
-`;
-
-});
-
-document.getElementById("daftarBab").innerHTML=
-html;
-
-updateDashboard();
-}
-
-function hapusBab(index){
-
-if(confirm("Hapus bab ini?")){
-
-bab.splice(index,1);
-
-simpan();
-tampilkanBab();
-
-}
-
-}
-
-function editBab(index){
-
-let judul =
-prompt("Edit Judul",
-bab[index].judul);
-
-if(judul===null)return;
-
-let isi =
-prompt("Edit Isi",
-bab[index].isi);
-
-if(isi===null)return;
-
-bab[index].judul=judul;
-bab[index].isi=isi;
-
-simpan();
-tampilkanBab();
-
-}
-
-function tambahKarakter(){
-
-let nama =
-document.getElementById("namaKarakter").value;
-
-let info =
-document.getElementById("infoKarakter").value;
-
-if(nama=="" || info==""){
-alert("Isi semua data!");
-return;
-}
-
-karakter.push({
-nama:nama,
-info:info
-});
-
-simpan();
-tampilkanKarakter();
-
-document.getElementById("namaKarakter").value="";
-document.getElementById("infoKarakter").value="";
-}
-
-function tampilkanKarakter(){
-
-let html="";
-
-karakter.forEach((k,index)=>{
-
-html+=`
-<div class="character">
-
-<h3>${k.nama}</h3>
-
-<p>${k.info}</p>
-
-<button onclick="hapusKarakter(${index})">
-Hapus
-</button>
-
-</div>
-`;
-
-});
-
-document.getElementById("karakterList").innerHTML=
-html;
-
-updateDashboard();
-}
-
-function hapusKarakter(index){
-
-if(confirm("Hapus karakter ini?")){
-
-karakter.splice(index,1);
-
-simpan();
-tampilkanKarakter();
-
-}
-
-}
-
-tampilkanBab();
-tampilkanKarakter();
-
-</script>
-
-</body>
-  </html>
