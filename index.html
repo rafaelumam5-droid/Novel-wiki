@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📚 WIKI NOVEL DATABASE</title>
+    <title>📚 WIKI NOVEL MASTER DATABASE</title>
 
     <script>
-        var password = prompt("Masukkan Kata Sandi untuk Melihat Konten:");
+        var password = prompt("Masukkan Kata Sandi untuk Melihat Konten Master:");
         if (password !== "MORPT") { 
             alert("Kata sandi salah!");
             window.location.href = "https://github.com"; 
@@ -17,7 +17,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 
     <script>
-        // Konfigurasi resmi dari konsol Firebase Anda
+        // Konfigurasi resmi Firebase Anda sesuai screenshot konsol
         const firebaseConfig = {
             apiKey: "AIzaSyBw4nrBcyiIO6Kic8y26GIXQ8plK8aQouw",
             authDomain: "wiki-novel.firebaseapp.com",
@@ -35,183 +35,301 @@
     </script>
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
-        body { background: #0f0f0f; color: white; }
-        header { background: #181818; padding: 20px; text-align: center; border-bottom: 1px solid #333; }
-        header h1 { color: #ffffff; }
-        .container { max-width: 1000px; margin: auto; padding: 20px; }
-        .card { background: #1a1a1a; padding: 15px; margin-bottom: 15px; border-radius: 10px; border: 1px solid #333; }
-        h2 { margin-bottom: 10px; }
-        input, textarea { width: 100%; background: #111; color: white; border: 1px solid #444; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
-        button { background: #444; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; margin: 2px; }
-        button:hover { background: #666; }
-        .bab, .character { padding: 10px; margin-top: 10px; background: #151515; border-radius: 5px; border: 1px solid #333; }
-        .stat { display: flex; gap: 10px; flex-wrap: wrap; }
-        .box { flex: 1; min-width: 150px; background: #161616; padding: 15px; border-radius: 10px; text-align: center; }
-        a { color: #7db4ff; text-decoration: none; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background: #0c0c0e; color: #e2e8f0; display: flex; flex-direction: column; min-height: 100vh; }
+        
+        header { background: #141417; padding: 15px 20px; text-align: center; border-bottom: 1px solid #27272a; position: sticky; top: 0; z-index: 100; }
+        header h1 { color: #f8fafc; font-size: 1.5rem; letter-spacing: 1px; }
+        header p { color: #94a3b8; font-size: 0.85rem; margin-top: 2px; }
+
+        /* Layout Navigasi Tab */
+        .wiki-layout { display: flex; flex-direction: column; flex: 1; }
+        
+        .nav-tabs { display: flex; background: #18181b; overflow-x: auto; white-space: nowrap; border-bottom: 1px solid #27272a; padding: 5px 10px; }
+        .nav-tabs::-webkit-scrollbar { height: 4px; }
+        .nav-tabs::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
+        
+        .tab-btn { background: transparent; color: #a1a1aa; border: none; padding: 10px 16px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; border-radius: 6px; margin-right: 5px; }
+        .tab-btn:hover { background: #27272a; color: #f4f4f5; }
+        .tab-btn.active { background: #3b82f6; color: white; }
+
+        .container { max-width: 1100px; width: 100%; margin: auto; padding: 15px; flex: 1; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+
+        /* Desain Card & Form */
+        .card { background: #18181b; padding: 20px; margin-bottom: 20px; border-radius: 12px; border: 1px solid #27272a; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.5); }
+        h2 { color: #f3f4f6; border-bottom: 2px solid #3f3f46; padding-bottom: 6px; margin-bottom: 15px; font-size: 1.25rem; display: flex; justify-content: space-between; align-items: center; }
+        h3 { color: #3b82f6; font-size: 1.05rem; margin: 15px 0 8px 0; }
+        
+        label { display: block; font-size: 0.85rem; color: #94a3b8; margin-bottom: 5px; font-weight: 600; }
+        input, textarea, select { width: 100%; background: #09090b; color: #f4f4f5; border: 1px solid #3f3f46; padding: 10px; margin-bottom: 12px; border-radius: 6px; font-size: 0.9rem; transition: border 0.2s; }
+        input:focus, textarea:focus, select:focus { border-color: #3b82f6; outline: none; }
+        
+        /* Tombol */
+        .btn-group { display: flex; gap: 8px; margin-top: 5px; }
+        button { background: #27272a; color: #f4f4f5; border: 1px solid #3f3f46; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500; transition: all 0.2s; }
+        button:hover { background: #3f3f46; border-color: #52525b; }
+        button.btn-primary { background: #3b82f6; color: white; border: none; font-weight: 600; }
+        button.btn-primary:hover { background: #2563eb; }
+        button.btn-danger { background: #ef4444; color: white; border: none; padding: 6px 12px; font-size: 0.8rem; }
+        button.btn-danger:hover { background: #dc2626; }
+
+        /* Statistik Beranda */
+        .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, min-width(140px, 1fr)); gap: 12px; margin-top: 15px; }
+        .stat-box { background: #212124; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #2d2d30; }
+        .stat-box h3 { font-size: 1.75rem; color: #3b82f6; margin: 5px 0; }
+        .stat-box p { font-size: 0.8rem; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Data Render List */
+        .render-item { background: #09090b; padding: 12px 15px; border-radius: 8px; border-left: 4px solid #3b82f6; margin-bottom: 10px; position: relative; }
+        .render-item p { font-size: 0.9rem; line-height: 1.5; color: #cbd5e1; margin-top: 4px; }
+        .meta-tag { display: inline-block; background: #27272a; color: #cbd5e1; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; margin-top: 5px; font-weight: bold; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @media(min-width: 768px) {
+            .nav-tabs { justify-content: center; overflow-x: visible; }
+            .grid-stats { grid-template-columns: repeat(4, 1fr); }
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>📚 WIKI NOVEL DATABASE</h1>
-        <p>Memulai Hidup Baru di Dunia Lain</p>
+        <h1>📚 WIKI NOVEL MASTER ENGINE</h1>
+        <p>Proyek: Memulai Hidup Baru di Dunia Lain</p>
     </header>
 
-    <div class="container">
-        <div class="card">
-            <h2>Dashboard</h2>
-            <div class="stat">
-                <div class="box"><h3 id="babCount">0</h3><p>Total Bab</p></div>
-                <div class="box"><h3 id="charCount">0</h3><p>Karakter</p></div>
+    <div class="wiki-layout">
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('beranda')">BERANDA</button>
+            <button class="tab-btn" onclick="switchTab('canon')">CANON UTAMA</button>
+            <button class="tab-btn" onclick="switchTab('karakter')">KARAKTER</button>
+            <button class="tab-btn" onclick="switchTab('organisasi')">ORGANISASI</button>
+            <button class="tab-btn" onclick="switchTab('dunia')">DUNIA & RAS</button>
+            <button class="tab-btn" onclick="switchTab('timeline')">TIMELINE</button>
+            <button class="tab-btn" onclick="switchTab('bab')">DATABASE BAB</button>
+            <button class="tab-btn" onclick="switchTab('sistem-kekuatan')">SISTEM KEKUATAN</button>
+            <button class="tab-btn" onclick="switchTab('hubungan')">HUBUNGAN</button>
+            <button class="tab-btn" onclick="switchTab('fakta')">FAKTA PENTING</button>
+            <button class="tab-btn" onclick="switchTab('changelog')">CHANGELOG</button>
+            <button class="tab-btn" onclick="switchTab('arsip')">ARSIP IDE</button>
+        </div>
+
+        <div class="container">
+
+            <div id="beranda" class="tab-content active">
+                <div class="card">
+                    <h2>Status Proyek Utama</h2>
+                    <label>Judul Novel</label>
+                    <input type="text" id="metaJudul" value="Memulai Hidup Baru di Dunia Lain" readonly>
+                    <label>Versi Canon Terbaru</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="metaVersi" placeholder="Contoh: v1.0.4 - Arc 2 Selesai">
+                        <button onclick="updateMetaVersi()" class="btn-primary">Update</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2>Live Cloud Database Stats</h2>
+                    <div class="grid-stats">
+                        <div class="stat-box"><p>Status DB</p><h3 style="color: #22c55e; font-size: 1.2rem; margin-top: 12px;">ONLINE</h3></div>
+                        <div class="stat-box"><p>Total Bab</p><h3 id="statBab">0</h3></div>
+                        <div class="stat-box"><p>Karakter</p><h3 id="statChar">0</h3></div>
+                        <div class="stat-box"><p>Versi Aktif</p><h3 id="statVersi" style="font-size: 1.1rem; margin-top: 12px;">v1.0.0</h3></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2>🤖 Integrasi AI</h2>
+                    <p style="font-size: 0.9rem; color: #a1a1aa; margin-bottom: 12px;">Gunakan tombol ini untuk berkonsultasi plot cadangan dengan ChatGPT.</p>
+                    <a href="https://chatgpt.com" target="_blank"><button class="btn-primary">Buka Asisten ChatGPT</button></a>
+                </div>
             </div>
-        </div>
 
-        <div class="card">
-            <h2>🤖 ChatGPT</h2>
-            <a href="https://chatgpt.com" target="_blank"><button>Buka ChatGPT</button></a>
-        </div>
+            <div id="canon" class="tab-content">
+                <div class="card">
+                    <h2>Pengaturan Canon Utama</h2>
+                    <label>Kategori Utama</label>
+                    <select id="canonKategori">
+                        <option value="Ringkasan Cerita">Ringkasan Cerita</option>
+                        <option value="Tema Cerita">Tema Cerita</option>
+                        <option value="Aturan Dunia">Aturan Dunia</option>
+                        <option value="Sistem Kekuatan Dasar">Sistem Kekuatan Dasar</option>
+                        <option value="Fakta Mutlak (Tidak Boleh Berubah)">Fakta Mutlak (Tidak Boleh Berubah)</option>
+                    </select>
+                    <label>Deskripsi Inti Konten</label>
+                    <textarea id="canonIsi" rows="6" placeholder="Ketikkan dasar aturan/cerita secara lengkap..."></textarea>
+                    <button onclick="simpanUmum('canon', 'canonKategori', 'canonIsi')" class="btn-primary">Simpan Aturan Canon</button>
+                </div>
+                <div class="card">
+                    <h2>Daftar Dokumen Canon Utama</h2>
+                    <div id="list-canon">Memuat data cloud...</div>
+                </div>
+            </div>
 
-        <div class="card">
-            <h2>➕ Tambah Bab</h2>
-            <input type="text" id="judulBab" placeholder="Judul Bab">
-            <textarea id="isiBab" rows="8" placeholder="Tulis isi bab..."></textarea>
-            <button onclick="tambahBab()">Simpan Bab</button>
-        </div>
+            <div id="karakter" class="tab-content">
+                <div class="card">
+                    <h2>Registrasi Karakter Baru</h2>
+                    <label>Jenis Tokoh</label>
+                    <select id="charJenis">
+                        <option value="Tokoh Utama">Tokoh Utama</option>
+                        <option value="Tokoh Pendukung">Tokoh Pendukung</option>
+                        <option value="Tokoh Antagonis">Tokoh Antagonis</option>
+                    </select>
+                    <label>Nama Karakter</label>
+                    <input type="text" id="charNama" placeholder="Nama Lengkap">
+                    <label>Status (Hidup / Mati / Segel / Misteri)</label>
+                    <input type="text" id="charStatus" placeholder="Contoh: Hidup (Aktif)">
+                    <label>Afiliasi / Fraksi</label>
+                    <input type="text" id="charAfiliasi" placeholder="Contoh: The Owl / Kerajaan Althea">
+                    <label>Kemampuan / Sihir / Skill</label>
+                    <input type="text" id="charKemampuan" placeholder="Sihir Bayangan, Pedang Rune">
+                    <label>Riwayat Singkat (Latar Belakang Plot)</label>
+                    <textarea id="charRiwayat" rows="4" placeholder="Tulis asal usul tokoh..."></textarea>
+                    <button onclick="simpanKarakter()" class="btn-primary">Simpan Karakter Cloud</button>
+                </div>
+                <div class="card">
+                    <h2>Database Karakter Terdaftar</h2>
+                    <div id="list-karakter">Memuat data cloud...</div>
+                </div>
+            </div>
 
-        <div class="card">
-            <h2>📖 Daftar Bab</h2>
-            <div id="daftarBab">Memuat data bab dari cloud...</div>
-        </div>
+            <div id="organisasi" class="tab-content">
+                <div class="card">
+                    <h2>Manajemen Fraksi & Organisasi</h2>
+                    <label>Nama Organisasi</label>
+                    <select id="orgNama">
+                        <option value="The Owl">The Owl (Fraksi Utama)</option>
+                        <option value="Organisasi Lain A">Organisasi Sampingan / Musuh</option>
+                    </select>
+                    <label>Sejarah Berdirinya</label>
+                    <textarea id="orgSejarah" rows="3"></textarea>
+                    <label>Tujuan Utama / Visi</label>
+                    <input type="text" id="orgTujuan" placeholder="Mencari kebenaran dunia luar">
+                    <label>Anggota Kunci</label>
+                    <input type="text" id="orgAnggota" placeholder="Cedric, Shella, Eleric">
+                    <button onclick="simpanOrganisasi()" class="btn-primary">Simpan Organisasi</button>
+                </div>
+                <div class="card">
+                    <h2>Daftar Struktur Organisasi</h2>
+                    <div id="list-organisasi">Memuat data cloud...</div>
+                </div>
+            </div>
 
-        <div class="card">
-            <h2>👤 Tambah Karakter</h2>
-            <input type="text" id="namaKarakter" placeholder="Nama Karakter">
-            <textarea id="infoKarakter" placeholder="Deskripsi karakter"></textarea>
-            <button onclick="tambahKarakter()">Simpan Karakter</button>
-        </div>
+            <div id="dunia" class="tab-content">
+                <div class="card">
+                    <h2>Setting Geografi Dunia & Klasifikasi Ras</h2>
+                    <label>Kategori Setting</label>
+                    <select id="duniaKategori">
+                        <option value="Lokasi - Kerajaan">Lokasi - Kerajaan</option>
+                        <option value="Lokasi - Kota">Lokasi - Kota</option>
+                        <option value="Lokasi - Benteng/Wilayah Penting">Lokasi - Benteng/Wilayah Penting</option>
+                        <option value="Ras - Manusia">Ras - Manusia</option>
+                        <option value="Ras - Ras Lain">Ras - Ras Lain</option>
+                        <option value="Sejarah Peristiwa Dunia">Sejarah Peristiwa Dunia Lama</option>
+                    </select>
+                    <label>Penjelasan Teknis Lokasi/Ras</label>
+                    <textarea id="duniaIsi" rows="5" placeholder="Tulis spesifikasi mendalam..."></textarea>
+                    <button onclick="simpanUmum('dunia', 'duniaKategori', 'duniaIsi')" class="btn-primary">Simpan Data Dunia</button>
+                </div>
+                <div class="card">
+                    <h2>Arsip Ensiklopedia Dunia</h2>
+                    <div id="list-dunia">Memuat data cloud...</div>
+                </div>
+            </div>
 
-        <div class="card">
-            <h2>👥 Database Karakter</h2>
-            <div id="karakterList">Memuat data karakter dari cloud...</div>
-        </div>
-    </div>
+            <div id="timeline" class="tab-content">
+                <div class="card">
+                    <h2>Manajemen Alur Garis Waktu (Timeline)</h2>
+                    <label>Pembagian Plot Waktu</label>
+                    <select id="timeKategori">
+                        <option value="Sebelum Cerita Mulai (Era Kuno)">Sebelum Cerita Mulai (Era Kuno)</option>
+                        <option value="Arc Bab 01 - 10">Arc Bab 01 - 10</option>
+                        <option value="Arc Bab 11 - 20">Arc Bab 11 - 20</option>
+                        <option value="Arc Bab 21 - 30">Arc Bab 21 - 30</option>
+                        <option value="Arc Bab 31 - 40">Arc Bab 31 - 40</option>
+                    </select>
+                    <label>Ringkasan Kejadian & Kronologi Masalah</label>
+                    <textarea id="timeIsi" rows="5"></textarea>
+                    <button onclick="simpanUmum('timeline', 'timeKategori', 'timeIsi')" class="btn-primary">Kunci Garis Waktu</button>
+                </div>
+                <div class="card">
+                    <h2>Alur Plot Kronologi Canon</h2>
+                    <div id="list-timeline">Memuat data cloud...</div>
+                </div>
+            </div>
 
-    <script>
-        let bab = [];
-        let karakter = [];
+            <div id="bab" class="tab-content">
+                <div class="card">
+                    <h2>Input Ringkasan Per-Bab (Log Database)</h2>
+                    <label>Nomor Bab / Indeks</label>
+                    <input type="number" id="babNomor" placeholder="Contoh: 1">
+                    <label>Judul Bab Resmi</label>
+                    <input type="text" id="babJudul" placeholder="Kebangkitan dari Kegelapan">
+                    <label>Ringkasan Isi Cerita Singkat</label>
+                    <textarea id="babRingkasan" rows="3" placeholder="Apa yang terjadi di bab ini?"></textarea>
+                    <label>Karakter yang Muncul di Bab Ini</label>
+                    <input type="text" id="babChar" placeholder="Cedric, Shella">
+                    <label>Peristiwa Penting / Kejadian Sakral</label>
+                    <input type="text" id="babEvent" placeholder="Penemuan artefak kuno mata elang">
+                    <button onclick="simpanBabSpesifik()" class="btn-primary">Simpan Rekam Bab</button>
+                </div>
+                <div class="card">
+                    <h2>Arsip Urutan Ringkasan Bab</h2>
+                    <div id="list-bab">Memuat data cloud...</div>
+                </div>
+            </div>
 
-        // Ambil data Bab secara Realtime
-        database.ref('wiki/bab').on('value', (snapshot) => {
-            bab = snapshot.val() || [];
-            tampilkanBab();
-        }, (error) => {
-            alert("Error sinkronisasi Firebase (Bab): " + error.message);
-        });
+            <div id="sistem-kekuatan" class="tab-content">
+                <div class="card">
+                    <h2>Spesifikasi Sistem Kekuatan & Magic Rule</h2>
+                    <select id="powerKategori">
+                        <option value="Tingkatan Kekuatan / Rank">Tingkatan Kekuatan / Rank</option>
+                        <option value="Jenis Sihir / Elemen">Jenis Sihir / Elemen</option>
+                        <option value="Aturan Kemampuan Magic">Aturan Kemampuan Magic</option>
+                        <option value="Batasan Kekuatan / Konsekuensi">Batasan Kekuatan / Konsekuensi Mutlak</option>
+                    </select>
+                    <label>Uraian Aturan</label>
+                    <textarea id="powerIsi" rows="5"></textarea>
+                    <button onclick="simpanUmum('power', 'powerKategori', 'powerIsi')" class="btn-primary">Simpan Sistem Kekuatan</button>
+                </div>
+                <div class="card">
+                    <h2>Parameter Skala Kekuatan Dunia</h2>
+                    <div id="list-power">Memuat data cloud...</div>
+                </div>
+            </div>
 
-        // Ambil data Karakter secara Realtime
-        database.ref('wiki/karakter').on('value', (snapshot) => {
-            karakter = snapshot.val() || [];
-            tampilkanKarakter();
-        }, (error) => {
-            alert("Error sinkronisasi Firebase (Karakter): " + error.message);
-        });
+            <div id="hubungan" class="tab-content">
+                <div class="card">
+                    <h2>Set Dinamika Hubungan Antar Tokoh / Aliansi</h2>
+                    <label>Subjek Hubungan</label>
+                    <select id="hubKategori">
+                        <option value="Cedric <-> Shella">Cedric ↔ Shella</option>
+                        <option value="Cedric <-> Eleric">Cedric ↔ Eleric</option>
+                        <option value="The Owl <-> Organisasi Lain">The Owl ↔ Organisasi Lain</option>
+                    </select>
+                    <label>Status & Rahasia Hubungan (Romance/Rival/Enemy/Kemitraan)</label>
+                    <textarea id="hubIsi" rows="4" placeholder="Jelaskan dinamika interaksi mereka dalam plot..."></textarea>
+                    <button onclick="simpanUmum('hubungan', 'hubKategori', 'hubIsi')" class="btn-primary">Simpan Hubungan</button>
+                </div>
+                <div class="card">
+                    <h2>Peta Hubungan Sosial & Politik Karakter</h2>
+                    <div id="list-hubungan">Memuat data cloud...</div>
+                </div>
+            </div>
 
-        function updateDashboard(){
-            document.getElementById("babCount").innerText = bab.length;
-            document.getElementById("charCount").innerText = karakter.length;
-        }
-
-        function simpanKeCloud(path, data) {
-            database.ref(path).set(data, (error) => {
-                if (error) {
-                    alert("Gagal menyimpan ke Server Cloud: " + error.message);
-                } else {
-                    alert("Sukses! Data Novel Berhasil Tersimpan di Cloud.");
-                }
-            });
-        }
-
-        function tambahBab(){
-            let judul = document.getElementById("judulBab").value;
-            let isi = document.getElementById("isiBab").value;
-            if(judul=="" || isi=="") { alert("Isi semua data!"); return; }
-            bab.push({ judul: judul, isi: isi });
-            simpanKeCloud('wiki/bab', bab);
-            document.getElementById("judulBab").value="";
-            document.getElementById("isiBab").value="";
-        }
-
-        function tampilkanBab(){
-            let html="";
-            if(bab.length === 0) {
-                html = "<p>Belum ada bab di database cloud.</p>";
-            } else {
-                bab.forEach((b, index)=>{
-                    if(b) { 
-                        html+= `<div class="bab">
-                            <h3>${b.judul}</h3>
-                            <p>${b.isi.replace(/\n/g,"<br>")}</p>
-                            <button onclick="editBab(${index})">Edit</button>
-                            <button onclick="hapusBab(${index})">Hapus</button>
-                        </div>`;
-                    }
-                });
-            }
-            document.getElementById("daftarBab").innerHTML = html;
-            updateDashboard();
-        }
-
-        function hapusBab(index){
-            if(confirm("Hapus bab ini dari cloud?")){
-                bab.splice(index, 1);
-                simpanKeCloud('wiki/bab', bab);
-            }
-        }
-
-        function editBab(index){
-            let judul = prompt("Edit Judul", bab[index].judul); if(judul===null) return;
-            let isi = prompt("Edit Isi", bab[index].isi); if(isi===null) return;
-            bab[index].judul = judul;
-            bab[index].isi = isi;
-            simpanKeCloud('wiki/bab', bab);
-        }
-
-        function tambahKarakter(){
-            let nama = document.getElementById("namaKarakter").value;
-            let info = document.getElementById("infoKarakter").value;
-            if(nama=="" || info=="") { alert("Isi semua data!"); return; }
-            karakter.push({ nama: nama, info: info });
-            simpanKeCloud('wiki/karakter', karakter);
-            document.getElementById("namaKarakter").value="";
-            document.getElementById("infoKarakter").value="";
-        }
-
-        function tampilkanKarakter(){
-            let html="";
-            if(karakter.length === 0) {
-                html = "<p>Belum ada karakter di database cloud.</p>";
-            } else {
-                karakter.forEach((k, index)=>{
-                    if(k) { 
-                        html+= `<div class="character">
-                            <h3>${k.nama}</h3>
-                            <p>${k.info.replace(/\n/g,"<br>")}</p>
-                            <button onclick="hapusKarakter(${index})">Hapus</button>
-                        </div>`;
-                    }
-                });
-            }
-            document.getElementById("karakterList").innerHTML = html;
-            updateDashboard();
-        }
-
-        function hapusKarakter(index){
-            if(confirm("Hapus karakter ini dari cloud?")){
-                karakter.splice(index, 1);
-                simpanKeCloud('wiki/karakter', karakter);
-            }
-        }
-    </script>
-</body>
-    </html>
+            <div id="fakta" class="tab-content">
+                <div class="card">
+                    <h2>Kunci Kebenaran / Fakta Rahasia</h2>
+                    <select id="faktaKategori">
+                        <option value="Fakta yang Sudah Dipastikan Canon">Fakta yang Sudah Dipastikan Canon</option>
+                        <option value="Fakta Rahasia yang Masih Misteri">Fakta Rahasia yang Masih Misteri</option>
+                        <option value="Foreshadowing yang Sudah Ditanam (Petunjuk)">Foreshadowing yang Sudah Ditanam (Petunjuk)</option>
+                    </select>
+                    <label>Uraian Fakta / Plot Twist</label>
+                    <textarea id="faktaIsi" rows="4"></textarea>
+                    <button onclick="simpanUmum('fakta', 'faktaKategori', 'faktaIsi')" class="btn-primary">Kunci Fakta</button>
+                </div>
+                <div class="card">
+                    <h2>Daftar Kebenaran Alur Cerita</h2>
+                    <div id="list-fakta">Memuat data cloud...</div>
+           
