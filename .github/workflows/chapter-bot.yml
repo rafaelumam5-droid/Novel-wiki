@@ -1,0 +1,15 @@
+name: Chapter Bot
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Print Issue
+        run: |
+          echo "${{ github.event.issue.title }}"
+          echo "${{ github.event.issue.body }}"
