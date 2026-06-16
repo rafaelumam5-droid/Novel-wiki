@@ -24,6 +24,31 @@
 </body>
 </html>
 
+    <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyBw4nrBcyiIO6Kic8y26GIXQ8plK8aQouw",
+    authDomain: "wiki-novel.firebaseapp.com",
+    databaseURL: "https://wiki-novel-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "wiki-novel",
+    storageBucket: "wiki-novel.firebasestorage.app",
+    messagingSenderId: "35934478405",
+    appId: "1:35934478405:web:b895bcbc73c321dac1432c",
+    measurementId: "G-97J07XT168"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+
 <style>
 *{
     margin:0;
