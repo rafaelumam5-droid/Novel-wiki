@@ -56,7 +56,7 @@
     </div>
 
     <script>
-        // STRUKTUR DATA KONFIGURASI KATEGORI (Sangat Fleksibel & Bebas Ditulis)
+        // CONFIGURASI FORM GENERATOR (Menulis Bebas & Hapus Semua Kategori Aktif)
         const susunanTab = [
             { id: "beranda", nama: "BERANDA" },
             { id: "canon", nama: "CANON UTAMA", fields: [{id:"kategori", label:"Kategori / Topik"}, {id:"konten", label:"Uraian Isi Konten", tipe:"textarea"}] },
@@ -72,10 +72,11 @@
             { id: "arsip", nama: "ARSIP IDE", fields: [{id:"kategori", label:"Kategori Ide Cadangan"}, {id:"konten", label:"Coretan Pikiran Kreatif", tipe:"textarea"}] }
         ];
 
-        // OTOMATISASI GENERATOR MENU & FORM INPUT
+        // GENERATE MENU TAB & FORM INPUT KATEGORI
         let htmlMenu = "", htmlForm = "";
         susunanTab.forEach((tab, idx) => {
-            htmlMenu += `<button class="tab-btn ${idx===0?'active':''}" onclick="switchTab('${tab.id}')">${tab.nama}</button>`;
+            // Perbaikan sistem klik menu menggunakan parameter index tombol (idx)
+            htmlMenu += `<button class="tab-btn ${idx===0?'active':''}" data-btn-id="${tab.id}" onclick="switchTab('${tab.id}', ${idx})">${tab.nama}</button>`;
             if (tab.fields) {
                 let fieldsHtml = tab.fields.map(f => `
                     <label>${f.label}</label>
@@ -96,20 +97,30 @@
         document.getElementById("menuUtama").innerHTML = htmlMenu;
         document.getElementById("generatorForm").innerHTML = htmlForm;
 
-        function switchTab(id) {
-            document.querySelectorAll('.tab-content, .tab-btn').forEach(el => el.classList.remove('active'));
+        // FUNGSI PERPINDAHAN TAB JAMINAN 100% WORK
+        function switchTab(id, index) {
+            // Sembunyikan semua konten tab terlebih dahulu
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            // Aktifkan konten tab yang dituju
             document.getElementById('tab-' + id).classList.add('active');
-            if (event && event.currentTarget) event.currentTarget.classList.add('active');
+            
+            // Ambil elemen tombol berdasarkan index urutannya lalu nyalakan warna oranye
+            const semuaTombol = document.querySelectorAll('.tab-btn');
+            if(semuaTombol[index]) {
+                semuaTombol[index].classList.add('active');
+            }
         }
 
-        // KONEKSI REALTIME META VERSI
+        // FIREBASE CLOUD META VERSI ENGINE
         database.ref('wiki/meta_versi').on('value', snap => {
             let v = snap.val() || "v1.0.0";
             document.getElementById("metaVersi").value = v; document.getElementById("statVersi").innerText = v;
         });
         function updateMetaVersi() { database.ref('wiki/meta_versi').set(document.getElementById("metaVersi").value, err => {!err && alert("Versi diperbarui!");}); }
 
-        // SATU FUNGSI UNTUK MENYIMPAN SEMUA JENIS KATEGORI
+        // ENGINE PENYIMPANAN DATA MASSAL GLOBAL
         function simpanData(node) {
             let container = document.getElementById(`tab-${node}`);
             let inputs = container.querySelectorAll('[data-field]');
@@ -122,17 +133,17 @@
                 dataBaru[input.getAttribute('data-field')] = val;
             });
 
-            if (!valid) return alert("Mohon isi semua kolom inputan!");
+            if (!valid) return alert("Mohon isi semua kolom inputan terlebih dahulu!");
 
             database.ref('wiki/' + node).push(dataBaru, err => {
                 if (!err) {
-                    alert("Sukses tersimpan di Cloud!");
+                    alert("Sukses tersimpan di Cloud Database!");
                     inputs.forEach(input => input.value = "");
                 }
             });
         }
 
-        // SATU ENGINE LISTENER UNTUK MENAMPILKAN DAN MENGHAPUS DATA SEMUA KATEGORI
+        // ENGINE REALTIME SYNC LISTENER & PENGHAPUSAN MASSAL
         function pasangSinkronisasi(node) {
             let konfigurasi = susunanTab.find(t => t.id === node);
             database.ref('wiki/' + node).on('value', snapshot => {
@@ -157,7 +168,6 @@
                         }
                     });
                     if(item.waktu) html += `<small style="color:#666; display:block; margin-top:5px;">Disimpan: ${item.waktu}</small>`;
-                    // Fitur Hapus Global Aktif untuk semua Kategori
                     html += `<div style="text-align:right; margin-top:10px;"><button class="btn-danger" onclick="hapusItem('${node}','${key}')">Hapus</button></div></div>`;
                 });
                 container.innerHTML = html;
@@ -170,8 +180,8 @@
             }
         }
 
-        // AKTIFKAN SINKRONISASI OTOMATIS DATABASE UNTUK SEMUA TAB
+        // AKTIFKAN AUTO MONITORING SERVER UNTUK SEMUA TAB KATEGORI
         susunanTab.forEach(tab => { if (tab.fields) pasangSinkronisasi(tab.id); });
     </script>
 </body>
-                                                  </html>
+</html>
