@@ -521,3 +521,74 @@ database.ref("wiki/organisasi").on("value", snapshot => {
 
 
 });
+// ===============================
+// DATABASE LORE UMUM ENGINE
+// ===============================
+
+
+function tampilkanLore(node){
+
+    const list = document.getElementById("list-" + node);
+
+    if(!list) return;
+
+
+    database.ref("wiki/" + node).on("value", snapshot=>{
+
+
+        list.innerHTML="";
+
+
+        snapshot.forEach(data=>{
+
+
+            let item = data.val();
+
+
+            list.innerHTML += `
+
+            <div class="card">
+
+                <h3>${item.kategori}</h3>
+
+                <p>
+                ${item.konten}
+                </p>
+
+
+                <small>
+                ${item.waktu}
+                </small>
+
+
+            </div>
+
+            `;
+
+
+        });
+
+
+    });
+
+
+}
+
+
+// Aktifkan semua database lore
+
+[
+"canon",
+"dunia",
+"timeline",
+"power",
+"hubungan",
+"fakta",
+"changelog",
+"arsip"
+
+].forEach(item=>{
+
+    tampilkanLore(item);
+
+});
