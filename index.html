@@ -219,6 +219,17 @@ function simpanBabSpesifik(){
         return;
     }
 
+    function hapusBab(id){
+
+if(confirm("Hapus bab ini?")){
+
+database.ref("wiki/bab/" + id)
+.remove();
+
+}
+
+    }
+
 
     database.ref("wiki/bab/" + nomor).set({
 
@@ -294,6 +305,9 @@ database.ref("wiki/bab").on("value", snapshot => {
             ${bab.peristiwa}
             </p>
 
+            <button onclick="hapusBab('${data.key}')">
+Hapus
+</button>
 
         </div>
 
@@ -325,6 +339,17 @@ function simpanKarakter(){
     if(!nama){
         alert("Nama karakter wajib diisi!");
         return;
+    }
+
+    function hapusKarakter(id){
+
+if(confirm("Hapus karakter ini?")){
+
+database.ref("wiki/karakter/" + id)
+.remove();
+
+}
+
     }
 
 
@@ -412,6 +437,10 @@ database.ref("wiki/karakter").on("value", snapshot => {
             <b>Riwayat:</b><br>
             ${char.riwayat}
             </p>
+
+            <button onclick="hapusKarakter('${data.key}')">
+Hapus
+</button>
 
 
         </div>
