@@ -162,15 +162,7 @@
         }
     
             // Perbaikan deteksi tombol aktif agar tidak error saat diklik
-            if(event && event.currentTarget) {
-                event.currentTarget.classList.add('active');
-            } else {
-                // Fallback jika dipanggil otomatis oleh sistem tanpa click event asli
-                let buttons = document.querySelectorAll('.tab-btn');
-                buttons.forEach(btn => {
-                    if(btn.innerText === id.toUpperCase() || (id==='bab' && btn.innerText==='DATABASE BAB')) {
-                        btn.classList.add('active');
-                    }
+    
                 });
             }
         }
@@ -241,6 +233,10 @@ function simpanBabSpesifik(){
             document.getElementById("babEvent").value="";
 
         }
+
+    });
+
+}
 function hapusBab(id){
 
 if(confirm("Hapus bab ini?")){
@@ -251,10 +247,6 @@ database.ref("wiki/bab/" + id)
 }
 
 }
-    });
-
-}
-
 
 
 // Membaca database bab
@@ -361,6 +353,11 @@ function simpanKarakter(){
             document.getElementById("charRiwayat").value="";
 
         }
+
+    });
+
+}
+
 function hapusKarakter(id){
 
 if(confirm("Hapus karakter ini?")){
@@ -371,11 +368,6 @@ database.ref("wiki/karakter/" + id)
 }
 
 }
-    });
-
-}
-
-
 
 // Membaca database karakter
 database.ref("wiki/karakter").on("value", snapshot => {
