@@ -155,12 +155,12 @@
     document.getElementById('tab-' + id)
     .classList.add('active');
 
-
     if(e){
         e.currentTarget.classList.add('active');
     }
 
         }
+    
             // Perbaikan deteksi tombol aktif agar tidak error saat diklik
             if(event && event.currentTarget) {
                 event.currentTarget.classList.add('active');
@@ -219,18 +219,6 @@ function simpanBabSpesifik(){
         return;
     }
 
-    function hapusBab(id){
-
-if(confirm("Hapus bab ini?")){
-
-database.ref("wiki/bab/" + id)
-.remove();
-
-}
-
-    }
-
-
     database.ref("wiki/bab/" + nomor).set({
 
         nomor: nomor,
@@ -253,7 +241,16 @@ database.ref("wiki/bab/" + id)
             document.getElementById("babEvent").value="";
 
         }
+function hapusBab(id){
 
+if(confirm("Hapus bab ini?")){
+
+database.ref("wiki/bab/" + id)
+.remove();
+
+}
+
+}
     });
 
 }
@@ -341,18 +338,6 @@ function simpanKarakter(){
         return;
     }
 
-    function hapusKarakter(id){
-
-if(confirm("Hapus karakter ini?")){
-
-database.ref("wiki/karakter/" + id)
-.remove();
-
-}
-
-    }
-
-
     database.ref("wiki/karakter").push({
 
         jenis: jenis,
@@ -376,7 +361,16 @@ database.ref("wiki/karakter/" + id)
             document.getElementById("charRiwayat").value="";
 
         }
+function hapusKarakter(id){
 
+if(confirm("Hapus karakter ini?")){
+
+database.ref("wiki/karakter/" + id)
+.remove();
+
+}
+
+}
     });
 
 }
