@@ -188,3 +188,109 @@
         }
     });
          }
+        // ===============================
+// DATABASE BAB ENGINE
+// ===============================
+
+// Simpan bab ke Firebase
+function simpanBabSpesifik(){
+
+    let nomor = document.getElementById("babNomor").value;
+    let judul = document.getElementById("babJudul").value;
+    let ringkasan = document.getElementById("babRingkasan").value;
+    let karakter = document.getElementById("babChar").value;
+    let peristiwa = document.getElementById("babEvent").value;
+
+
+    if(!nomor || !judul){
+        alert("Nomor dan judul bab wajib diisi!");
+        return;
+    }
+
+
+    database.ref("wiki/bab/" + nomor).set({
+
+        nomor: nomor,
+        judul: judul,
+        ringkasan: ringkasan,
+        karakter: karakter,
+        peristiwa: peristiwa,
+        waktu: new Date().toLocaleString('id-ID')
+
+    }, error => {
+
+        if(!error){
+
+            alert("Bab berhasil disimpan!");
+
+            document.getElementById("babNomor").value="";
+            document.getElementById("babJudul").value="";
+            document.getElementById("babRingkasan").value="";
+            document.getElementById("babChar").value="";
+            document.getElementById("babEvent").value="";
+
+        }
+
+    });
+
+}
+
+
+
+// Membaca database bab
+database.ref("wiki/bab").on("value", snapshot => {
+
+    const list = document.getElementById("list-bab");
+
+    if(!list) return;
+
+    list.innerHTML="";
+
+    let jumlah = 0;
+
+
+    snapshot.forEach(data=>{
+
+        jumlah++;
+
+        let bab = data.val();
+
+
+        list.innerHTML += `
+
+        <div class="card">
+
+            <h3>
+            BAB ${bab.nomor}: ${bab.judul}
+            </h3>
+
+
+            <p>
+            <b>Ringkasan:</b><br>
+            ${bab.ringkasan}
+            </p>
+
+
+            <p>
+            <b>Karakter:</b>
+            ${bab.karakter}
+            </p>
+
+
+            <p>
+            <b>Peristiwa:</b>
+            ${bab.peristiwa}
+            </p>
+
+
+        </div>
+
+        `;
+
+    });
+
+
+    document.getElementById("statBab").innerText = jumlah;
+
+
+});
