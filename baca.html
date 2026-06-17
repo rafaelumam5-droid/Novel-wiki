@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📖 PORTAL BACA MULTI-WIKI NOVEL</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Georgia', serif; }
+        body { background: #121214; color: #e3e3e6; line-height: 1.8; padding: 20px; }
+        .wrapper { max-width: 800px; margin: auto; background: #1a1a1e; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1px solid #2a2a30; }
+        header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #ff6600; padding-bottom: 15px; }
+        h1 { color: #ffffff; font-size: 1.8rem; margin-bottom: 10px; font-family: 'Segoe UI', sans-serif; }
+        select { background: #26262b; color: #fff; border: 1px solid #3f3f46; padding: 10px; width: 100%; border-radius: 6px; font-size: 1rem; margin-bottom: 20px; font-family: 'Segoe UI', sans-serif; }
+        .bab-card { background: #111113; padding: 25px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #ff6600; }
+        .bab-title { color: #ff944d; font-size: 1.4rem; font-weight: bold; margin-bottom: 10px; font-family: 'Segoe UI', sans-serif; }
+        .meta-info { font-size: 0.85rem; color: #a0a0a5; margin-bottom: 15px; font-family: 'Segoe UI', sans-serif; }
+        .meta-info span { color: #ff6600; font-weight: bold; }
+        .konten-cerita { text-align: justify; white-space: pre-wrap; font-size: 1.1rem; color: #e3e3e6; }
+        .empty-state { text-align: center; color: #71717a; padding: 40px 0; font-family: 'Segoe UI', sans-serif; }
+    </style>
+    <!-- Firebase App & Database Compat -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBw4nrBcyiIO6Kic8y26GIXQ8plK8aQouw", authDomain: "wiki-novel.firebaseapp.com",
+            databaseURL: "https://wiki-novel-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "wiki-novel", storageBucket: "wiki-novel.firebasestorage.app",
+            messagingSenderId: "35934478405", appId: "1:35934478405:web:644e00c8724835d9c1432c"
+        };
+        firebase.initializeApp(firebaseConfig); const database = firebase.database();
+    </script>
+</head>
+<body>
+
+    <div class="wrapper">
+        <header>
+            <h1>📖 PORTAL BACA WIKI NOVEL</h1>
+            <p style="color: #a0a0a5; font-size: 0.9rem; font-family: 'Segoe UI', sans-serif;">Arsip Realtime Sinkronisasi AI Workspace</p>
+        </header>
+
+        <!-- PILIH PROYEK NOVEL YANG INGIN DIBACA -->
+        <label style="display:block; font-family:'Segoe UI', sans-serif; font-size:0.8rem; color:#ff944d; margin-bottom:5px; font-weight:bold;">PILIH JUDUL NOVEL:</label>
+        <select id="pilihNovelBaca" onchange="gantiKanalBaca()"></select>
+
+        <!-- TEMPAT DAFTAR BAB MUNCUL -->
+        <div id="containerBab">
+            <div class="empty-state">Memuat arsip linimasa bab dari Cloud Storage...</div>
+        </div>
+    </div>
+
+    <script>
+        let novelAktif = "";
+
+        // Load Daftar Project secara otomatis
+        database.ref('wiki_projek_list').on('value', snap => {
+            let list = snap.val(), html = "", selector = document.getElementById("pilihNovelBaca");
+            if(!list) return;
+            
+            Object.keys(list).forEach(key => { html += `<option value="${key}">${list[key].judul}</option>`; });
+            selector.innerHTML = html;
+            
+            if(!novelAktif) { novelAktif = selector.value; muatSeluruhBab(); }
+        });
+
+        function gantiKanalBaca() {
+            novelAktif = document.getElementById("pilihNovelBaca").value;
+            muatSeluruhBab();
+        }
+
+        function muatSeluruhBab() {
+            database.ref(`wiki/${novelAktif}/database_bab`).on('value', snapshot => {
+                let data = snapshot.val(), html = "", container = document.getElementById("containerBab");
+                if (!data) {
+                    container.innerHTML = `<div class="empty-state">Belum ada bab yang ditulis dan disimpan untuk novel ini.</div>`;
+                    return;
+                }
+
+                // Mengurutkan nomor bab dari terkecil ke terbesar
+                let keys = Object.keys(data).sort((a, b) => parseFloat(data[a].no) - parseFloat(data[b].no));
+                
+                keys.forEach(key => {
+                    let bab = data[key];
+                    html += `
+                        <div class="bab-card">
+                            <div class="bab-title">Bab ${bab.no}: ${bab.judul}</div>
+                            <div class="meta-info">
+                                👤 <span>Karakter Hadir:</span> ${bab.karakter || '-'} | 
+                                🔑 <span>Kunci Event:</span> ${bab.eventPenting || '-'}
+                            </div>
+                            <div class="konten-cerita">${bab.ringkasan}</div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            });
+        }
+    </script>
+</body>
+          </html>
