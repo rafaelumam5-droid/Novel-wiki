@@ -4,8 +4,10 @@ body { background: #0b0b0c; color: #ffffff; display: flex; flex-direction: colum
 header { background: #111113; padding: 15px; text-align: center; border-bottom: 2px solid #ff6600; position: sticky; top: 0; z-index: 100; }
 header h1 span { color: #ff6600; }
 header p { color: #a0a0a5; font-size: 0.8rem; margin-top: 4px; }
-.nav-tabs { display: flex; background: #161619; overflow-x: auto; border-bottom: 1px solid #26262b; padding: 6px; gap: 6px; }
-.tab-btn { background: #202024; color: #d0d0d5; border: 1px solid #2d2d34; padding: 8px 15px; font-size: 0.8rem; font-weight: 700; cursor: pointer; border-radius: 6px; white-space: nowrap; }
+.novel-selector-zone { background: #161619; padding: 12px; display: flex; justify-content: center; align-items: center; gap: 10px; border-bottom: 1px solid #232329; }
+.novel-select { max-width: 300px; margin-bottom: 0; background: #202024; border-color: #36363f; padding: 8px; }
+.nav-tabs { display: flex; background: #111113; overflow-x: auto; border-bottom: 1px solid #26262b; padding: 6px; gap: 6px; }
+.tab-btn { background: #1c1c21; color: #d0d0d5; border: 1px solid #2d2d34; padding: 8px 15px; font-size: 0.8rem; font-weight: 700; cursor: pointer; border-radius: 6px; white-space: nowrap; }
 .tab-btn.active { background: #ff6600; color: #ffffff; border-color: #ff6600; }
 .container { max-width: 1100px; width: 100%; margin: auto; padding: 15px; flex: 1; }
 .tab-content { display: none; }
