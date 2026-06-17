@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📚 WIKI NOVEL MASTER DATABASE</title>
-    
     <link rel="stylesheet" href="style.css">
-
     <script>
         if (prompt("Masukkan Kata Sandi Master:") !== "MORPT") { alert("Salah!"); window.location.href = "https://github.com"; }
     </script>
@@ -31,18 +29,14 @@
 
     <div class="wiki-layout">
         <div class="nav-tabs" id="menuUtama"></div>
-
         <div class="container" id="kontenUtama">
+            
             <div id="tab-beranda" class="tab-content active">
                 <div class="card">
                     <h2>Status Proyek Utama</h2>
-                    <label>Judul Novel</label>
-                    <input type="text" value="Memulai Hidup Baru di Dunia Lain" readonly>
+                    <label>Judul Novel</label><input type="text" value="Memulai Hidup Baru di Dunia Lain" readonly>
                     <label>Versi Canon Terbaru</label>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="text" id="metaVersi" placeholder="Contoh: v1.0.4">
-                        <button onclick="updateMetaVersi()" class="btn-primary">Update</button>
-                    </div>
+                    <div style="display: flex; gap: 10px;"><input type="text" id="metaVersi" placeholder="v1.0.0"><button onclick="updateMetaVersi()" class="btn-primary">Update</button></div>
                 </div>
                 <div class="card">
                     <h2>Live Cloud Database Stats</h2>
@@ -53,591 +47,131 @@
                         <div class="stat-box"><p style="color:#ff944d; font-size:0.75rem;">VERSI</p><h4 id="statVersi" style="color:#ff6600; margin-top:5px;">v1.0.0</h4></div>
                     </div>
                 </div>
-                <div class="card">
-                    <h2>🤖 Integrasi AI</h2>
-                    <a href="https://chatgpt.com" target="_blank"><button class="btn-primary">Buka ChatGPT Asisten</button></a>
-                </div>
+                <div class="card"><h2>🤖 Integrasi AI</h2><a href="https://chatgpt.com" target="_blank"><button class="btn-primary">Buka ChatGPT Asisten</button></a></div>
             </div>
 
-            <div id="generatorUmum"></div>
-
-            <div id="tab-karakter" class="tab-content">
-                <div class="card">
-                    <h2>Registrasi Karakter Baru</h2>
-                    <label>Jenis Tokoh</label>
-                    <select id="charJenis"><option value="Tokoh Utama">Tokoh Utama</option><option value="Tokoh Pendukung">Tokoh Pendukung</option><option value="Tokoh Antagonis">Tokoh Antagonis</option></select>
-                    <label>Nama Karakter</label><input type="text" id="charNama">
-                    <label>Status</label><input type="text" id="charStatus" placeholder="Hidup/Mati">
-                    <label>Afiliasi</label><input type="text" id="charAfiliasi">
-                    <label>Skill</label><input type="text" id="charKemampuan">
-                    <label>Riwayat</label><textarea id="charRiwayat" rows="3"></textarea>
-                    <button onclick="simpanKarakter()" class="btn-primary">Simpan Karakter</button>
-                </div>
-                <div class="card"><h2>Database Karakter</h2><div id="list-karakter"></div></div>
-            </div>
-
-            <div id="tab-organisasi" class="tab-content">
-                <div class="card">
-                    <h2>Manajemen Fraksi & Organisasi</h2>
-                    <label>Nama Organisasi</label><select id="orgNama"><option value="The Owl">The Owl</option><option value="Musuh">Fraksi Musuh</option></select>
-                    <label>Sejarah</label><textarea id="orgSejarah" rows="3"></textarea>
-                    <label>Tujuan</label><input type="text" id="orgTujuan">
-                    <label>Anggota Kunci</label><input type="text" id="orgAnggota">
-                    <button onclick="simpanOrganisasi()" class="btn-primary">Simpan Organisasi</button>
-                </div>
-                <div class="card"><h2>Daftar Struktur Organisasi</h2><div id="list-organisasi"></div></div>
-            </div>
-
-            <div id="tab-bab" class="tab-content">
-                <div class="card">
-                    <h2>Input Ringkasan Per-Bab</h2>
-                    <label>Nomor Bab</label><input type="number" id="babNomor">
-                    <label>Judul Bab</label><input type="text" id="babJudul">
-                    <label>Ringkasan</label><textarea id="babRingkasan" rows="3"></textarea>
-                    <label>Karakter Hadir</label><input type="text" id="babChar">
-                    <label>Peristiwa Kunci</label><input type="text" id="babEvent">
-                    <button onclick="simpanBabSpesifik()" class="btn-primary">Simpan Rekam Bab</button>
-                </div>
-                <div class="card"><h2>Arsip Ringkasan Bab</h2><div id="list-bab"></div></div>
-            </div>
+            <div id="generatorForm"></div>
 
         </div>
     </div>
 
     <script>
-        // DATA SUSUNAN TAB
+        // STRUKTUR DATA KONFIGURASI KATEGORI (Sangat Fleksibel & Bebas Ditulis)
         const susunanTab = [
-            { id: "beranda", nama: "BERANDA", tipe: "khusus" },
-            { id: "canon", nama: "CANON UTAMA", tipe: "umum", opsi: ["Ringkasan Cerita", "Tema Cerita", "Aturan Dunia", "Sistem Kekuatan Dasar", "Fakta Mutlak"] },
-            { id: "karakter", nama: "KARAKTER", tipe: "khusus" },
-            { id: "organisasi", nama: "ORGANISASI", tipe: "khusus" },
-            { id: "dunia", nama: "DUNIA & RAS", tipe: "umum", opsi: ["Lokasi - Kerajaan", "Lokasi - Kota", "Ras - Manusia", "Ras - Lainnya", "Sejarah Dunia"] },
-            { id: "timeline", nama: "TIMELINE", tipe: "umum", opsi: ["Era Kuno", "Arc Bab 01-10", "Arc Bab 11-20", "Arc Bab 21-30"] },
-            { id: "bab", nama: "DATABASE BAB", tipe: "khusus" },
-            { id: "power", nama: "SISTEM KEKUATAN", tipe: "umum", opsi: ["Tingkatan Rank", "Jenis Sihir", "Aturan Magic", "Konsekuensi Mutlak"] },
-            { id: "hubungan", nama: "HUBUNGAN", tipe: "umum", opsi: ["Hubungan Antar Karakter", "Hubungan Antar Organisasi / Fraksi"] },
-            { id: "fakta", nama: "FAKTA PENTING", tipe: "umum", opsi: ["Fakta Dipastikan Canon", "Fakta Rahasia Misteri", "Foreshadowing Petunjuk"] },
-            { id: "changelog", nama: "CHANGELOG", tipe: "umum", opsi: ["Perubahan Struktur Canon", "Revisi Sifat Karakter", "Revisi Garis Waktu"] },
-            { id: "arsip", nama: "ARSIP IDE", tipe: "umum", opsi: ["Ide Pengembangan Arc", "Karakter Cadangan", "Lokasi Cadangan", "Catatan Bebas"] }
+            { id: "beranda", nama: "BERANDA" },
+            { id: "canon", nama: "CANON UTAMA", fields: [{id:"kategori", label:"Kategori / Topik"}, {id:"konten", label:"Uraian Isi Konten", tipe:"textarea"}] },
+            { id: "karakter", nama: "KARAKTER", fields: [{id:"jenis", label:"Jenis Tokoh (Utama/Pendukung)"}, {id:"nama", label:"Nama Karakter"}, {id:"status", label:"Status (Hidup/Mati)"}, {id:"afiliasi", label:"Afiliasi / Fraksi"}, {id:"skill", label:"Kemampuan / Sihir"}, {id:"riwayat", label:"Riwayat / Latar Belakang", tipe:"textarea"}] },
+            { id: "organisasi", nama: "ORGANISASI", fields: [{id:"nama", label:"Nama Organisasi / Fraksi (Bebas Tulis)"}, {id:"tujuan", label:"Tujuan / Visi"}, {id:"anggota", label:"Anggota Kunci"}, {id:"sejarah", label:"Sejarah Berdiri", tipe:"textarea"}] },
+            { id: "dunia", nama: "DUNIA & RAS", fields: [{id:"kategori", label:"Jenis (Lokasi/Ras/Sejarah)"}, {id:"konten", label:"Penjelasan Spesifikasi", tipe:"textarea"}] },
+            { id: "timeline", nama: "TIMELINE", fields: [{id:"kategori", label:"Pembagian Plot Waktu"}, {id:"konten", label:"Ringkasan Kronologi Peristiwa", tipe:"textarea"}] },
+            { id: "database_bab", nama: "DATABASE BAB", fields: [{id:"no", label:"Nomor Bab"}, {id:"judul", label:"Judul Bab Resmi"}, {id:"karakter", label:"Karakter yang Hadir"}, {id:"eventPenting", label:"Peristiwa Kunci"}, {id:"ringkasan", label:"Ringkasan Cerita", tipe:"textarea"}] },
+            { id: "power", nama: "SISTEM KEKUATAN", fields: [{id:"kategori", label:"Parameter Kekuatan / Elemen"}, {id:"konten", label:"Uraian Aturan Magic", tipe:"textarea"}] },
+            { id: "hubungan", nama: "HUBUNGAN", fields: [{id:"kategori", label:"Jenis Hubungan Konten"}, {id:"konten", label:"Detail Interaksi Plot", tipe:"textarea"}] },
+            { id: "fakta", nama: "FAKTA PENTING", fields: [{id:"kategori", label:"Klasifikasi Fakta / Misteri"}, {id:"konten", label:"Uraian Fakta Kejadian", tipe:"textarea"}] },
+            { id: "changelog", nama: "CHANGELOG", fields: [{id:"kategori", label:"Bagian yang Direvisi"}, {id:"konten", label:"Detail Perubahan Skenario", tipe:"textarea"}] },
+            { id: "arsip", nama: "ARSIP IDE", fields: [{id:"kategori", label:"Kategori Ide Cadangan"}, {id:"konten", label:"Coretan Pikiran Kreatif", tipe:"textarea"}] }
         ];
 
-        // GENERATOR TOMBOL MENU & FORM INPUT UMUM
-        let htmlMenu = "", htmlFormUmum = "";
-        susunanTab.forEach((tab, index) => {
-            htmlMenu += `<button class="tab-btn ${index===0?'active':''}" onclick="switchTab('${tab.id}', event)">${tab.nama}</button>`;
-            
-            if(tab.tipe === "umum") {
-                let opsiHtml = tab.opsi.map(o => `<option value="${o}">${o}</option>`).join('');
-                htmlFormUmum += `
+        // OTOMATISASI GENERATOR MENU & FORM INPUT
+        let htmlMenu = "", htmlForm = "";
+        susunanTab.forEach((tab, idx) => {
+            htmlMenu += `<button class="tab-btn ${idx===0?'active':''}" onclick="switchTab('${tab.id}')">${tab.nama}</button>`;
+            if (tab.fields) {
+                let fieldsHtml = tab.fields.map(f => `
+                    <label>${f.label}</label>
+                    ${f.tipe==='textarea' ? `<textarea data-field="${f.id}" rows="4"></textarea>` : `<input type="text" data-field="${f.id}">`}
+                `).join('');
+                
+                htmlForm += `
                     <div id="tab-${tab.id}" class="tab-content">
                         <div class="card">
                             <h2>${tab.nama}</h2>
-                            <label>Kategori</label><select id="${tab.id}Kategori">${opsiHtml}</select>
-                            <label>Uraian Deskripsi</label><textarea id="${tab.id}Isi" rows="4"></textarea>
-                            <button onclick="simpanUmum('${tab.id}', '${tab.id}Kategori', '${tab.id}Isi')" class="btn-primary">Simpan Konten</button>
+                            ${fieldsHtml}
+                            <button onclick="simpanData('${tab.id}')" class="btn-primary">Simpan Konten</button>
                         </div>
                         <div class="card"><h2>Arsip Data Terkunci</h2><div id="list-${tab.id}"></div></div>
                     </div>`;
             }
         });
         document.getElementById("menuUtama").innerHTML = htmlMenu;
-        document.getElementById("generatorUmum").innerHTML = htmlFormUmum;
+        document.getElementById("generatorForm").innerHTML = htmlForm;
 
-        // FUNGSI NAVIGASI TAB
-        function switchTab(id, e) {
-
-    document.querySelectorAll('.tab-content')
-    .forEach(el => el.classList.remove('active'));
-
-    document.querySelectorAll('.tab-btn')
-    .forEach(el => el.classList.remove('active'));
-
-    document.getElementById('tab-' + id)
-    .classList.add('active');
-
-    if(e){
-        e.currentTarget.classList.add('active');
-    }
-
+        function switchTab(id) {
+            document.querySelectorAll('.tab-content, .tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + id).classList.add('active');
+            if (event && event.currentTarget) event.currentTarget.classList.add('active');
         }
 
-        // AMBIL DATA META VERSI
+        // KONEKSI REALTIME META VERSI
         database.ref('wiki/meta_versi').on('value', snap => {
             let v = snap.val() || "v1.0.0";
             document.getElementById("metaVersi").value = v; document.getElementById("statVersi").innerText = v;
         });
-        function updateMetaVersi() { database.ref('wiki/meta_versi').set(document.getElementById("metaVersi").value, err => {!err && alert("Versi diupdate!");}); }
+        function updateMetaVersi() { database.ref('wiki/meta_versi').set(document.getElementById("metaVersi").value, err => {!err && alert("Versi diperbarui!");}); }
 
-        // ENGINE SIMPAN KE CLOUD FIREBASE
-        function simpanUmum(node, selId, txtId) {
-    let kat = document.getElementById(selId).value;
-    let isi = document.getElementById(txtId).value;
+        // SATU FUNGSI UNTUK MENYIMPAN SEMUA JENIS KATEGORI
+        function simpanData(node) {
+            let container = document.getElementById(`tab-${node}`);
+            let inputs = container.querySelectorAll('[data-field]');
+            let dataBaru = { waktu: new Date().toLocaleString('id-ID') };
+            let valid = true;
 
-    if(!isi.trim()) return alert("Isi data kosong!");
+            inputs.forEach(input => {
+                let val = input.value.trim();
+                if (!val) valid = false;
+                dataBaru[input.getAttribute('data-field')] = val;
+            });
 
-    database.ref('wiki/' + node).push({
-        kategori: kat,
-        konten: isi,
-        waktu: new Date().toLocaleString('id-ID')
-    }, err => {
-        if(!err) { 
-            alert("Sukses!"); 
-            document.getElementById(txtId).value = "";
-        }
-    });
-         }
-        // ===============================
-// DATABASE BAB ENGINE
-// ===============================
+            if (!valid) return alert("Mohon isi semua kolom inputan!");
 
-// Simpan bab ke Firebase
-function simpanBabSpesifik(){
-
-    let nomor = document.getElementById("babNomor").value;
-    let judul = document.getElementById("babJudul").value;
-    let ringkasan = document.getElementById("babRingkasan").value;
-    let karakter = document.getElementById("babChar").value;
-    let peristiwa = document.getElementById("babEvent").value;
-
-
-    if(!nomor || !judul){
-        alert("Nomor dan judul bab wajib diisi!");
-        return;
-    }
-
-    database.ref("wiki/bab/" + nomor).set({
-
-        nomor: nomor,
-        judul: judul,
-        ringkasan: ringkasan,
-        karakter: karakter,
-        peristiwa: peristiwa,
-        waktu: new Date().toLocaleString('id-ID')
-
-    }, error => {
-
-        if(!error){
-
-            alert("Bab berhasil disimpan!");
-
-            document.getElementById("babNomor").value="";
-            document.getElementById("babJudul").value="";
-            document.getElementById("babRingkasan").value="";
-            document.getElementById("babChar").value="";
-            document.getElementById("babEvent").value="";
-
+            database.ref('wiki/' + node).push(dataBaru, err => {
+                if (!err) {
+                    alert("Sukses tersimpan di Cloud!");
+                    inputs.forEach(input => input.value = "");
+                }
+            });
         }
 
-    });
+        // SATU ENGINE LISTENER UNTUK MENAMPILKAN DAN MENGHAPUS DATA SEMUA KATEGORI
+        function pasangSinkronisasi(node) {
+            let konfigurasi = susunanTab.find(t => t.id === node);
+            database.ref('wiki/' + node).on('value', snapshot => {
+                let data = snapshot.val(), html = "", container = document.getElementById('list-' + node);
+                if (!data) { 
+                    container.innerHTML = "<p style='color:#71717a;'>Belum ada data terekam.</p>";
+                    if(node==='database_bab') document.getElementById("statBab").innerText = 0;
+                    if(node==='karakter') document.getElementById("statChar").innerText = 0;
+                    return; 
+                }
 
-}
-function hapusBab(id){
+                let keys = Object.keys(data);
+                if(node==='database_bab') document.getElementById("statBab").innerText = keys.length;
+                if(node==='karakter') document.getElementById("statChar").innerText = keys.length;
 
-if(confirm("Hapus bab ini?")){
-
-database.ref("wiki/bab/" + id)
-.remove();
-
-}
-
-}
-        function editBab(id){
-
-database.ref("wiki/bab/" + id).once("value")
-.then(snapshot => {
-
-let bab = snapshot.val();
-
-document.getElementById("babNomor").value = bab.nomor;
-document.getElementById("babJudul").value = bab.judul;
-document.getElementById("babRingkasan").value = bab.ringkasan;
-document.getElementById("babChar").value = bab.karakter;
-document.getElementById("babEvent").value = bab.peristiwa;
-
-window.scrollTo({
-top:0,
-behavior:"smooth"
-});
-
-alert("Mode Edit Aktif. Ubah data lalu tekan Simpan.");
-
-});
-
-        }
-    
-
-
-// Membaca database bab
-database.ref("wiki/bab").on("value", snapshot => {
-
-    const list = document.getElementById("list-bab");
-
-    if(!list) return;
-
-    list.innerHTML="";
-
-    let jumlah = 0;
-
-
-    snapshot.forEach(data=>{
-
-        jumlah++;
-
-        let bab = data.val();
-
-
-        list.innerHTML += `
-
-        <div class="card">
-
-            <h3>
-            BAB ${bab.nomor}: ${bab.judul}
-            </h3>
-
-
-            <p>
-            <b>Ringkasan:</b><br>
-            ${bab.ringkasan}
-            </p>
-
-
-            <p>
-            <b>Karakter:</b>
-            ${bab.karakter}
-            </p>
-
-
-            <p>
-            <b>Peristiwa:</b>
-            ${bab.peristiwa}
-            </p>
-
-            <button onclick="hapusBab('${data.key}')">
-Hapus
-</button>
-
-        </div>
-
-        `;
-
-    });
-
-
-    document.getElementById("statBab").innerText = jumlah;
-
-
-});
-// ===============================
-// DATABASE KARAKTER ENGINE
-// ===============================
-
-
-// Simpan karakter ke Firebase
-function simpanKarakter(){
-
-    let jenis = document.getElementById("charJenis").value;
-    let nama = document.getElementById("charNama").value;
-    let status = document.getElementById("charStatus").value;
-    let afiliasi = document.getElementById("charAfiliasi").value;
-    let skill = document.getElementById("charKemampuan").value;
-    let riwayat = document.getElementById("charRiwayat").value;
-
-
-    if(!nama){
-        alert("Nama karakter wajib diisi!");
-        return;
-    }
-
-    database.ref("wiki/karakter").push({
-
-        jenis: jenis,
-        nama: nama,
-        status: status,
-        afiliasi: afiliasi,
-        skill: skill,
-        riwayat: riwayat,
-        waktu: new Date().toLocaleString('id-ID')
-
-    }, error => {
-
-        if(!error){
-
-            alert("Karakter berhasil disimpan!");
-
-            document.getElementById("charNama").value="";
-            document.getElementById("charStatus").value="";
-            document.getElementById("charAfiliasi").value="";
-            document.getElementById("charKemampuan").value="";
-            document.getElementById("charRiwayat").value="";
-
+                keys.forEach(key => {
+                    let item = data[key];
+                    html += `<div class="render-item">`;
+                    konfigurasi.fields.forEach(f => {
+                        if(item[f.id]) {
+                            html += `<div class="item-field"><b>${f.label}:</b> <span style="white-space:pre-wrap;">${item[f.id]}</span></div>`;
+                        }
+                    });
+                    if(item.waktu) html += `<small style="color:#666; display:block; margin-top:5px;">Disimpan: ${item.waktu}</small>`;
+                    // Fitur Hapus Global Aktif untuk semua Kategori
+                    html += `<div style="text-align:right; margin-top:10px;"><button class="btn-danger" onclick="hapusItem('${node}','${key}')">Hapus</button></div></div>`;
+                });
+                container.innerHTML = html;
+            });
         }
 
-    });
-
-}
-
-function hapusKarakter(id){
-
-if(confirm("Hapus karakter ini?")){
-
-database.ref("wiki/karakter/" + id)
-.remove();
-
-}
-
-}
-
-// Membaca database karakter
-database.ref("wiki/karakter").on("value", snapshot => {
-
-    const list = document.getElementById("list-karakter");
-
-    if(!list) return;
-
-
-    list.innerHTML="";
-
-
-    let jumlah = 0;
-
-
-    snapshot.forEach(data=>{
-
-        jumlah++;
-
-        let char = data.val();
-
-
-        list.innerHTML += `
-
-        <div class="card">
-
-            <h3>
-            ${char.nama}
-            </h3>
-
-
-            <p>
-            <b>Jenis:</b> ${char.jenis}
-            </p>
-
-
-            <p>
-            <b>Status:</b> ${char.status}
-            </p>
-
-
-            <p>
-            <b>Afiliasi:</b> ${char.afiliasi}
-            </p>
-
-
-            <p>
-            <b>Skill:</b> ${char.skill}
-            </p>
-
-
-            <p>
-            <b>Riwayat:</b><br>
-            ${char.riwayat}
-            </p>
-
-            <button onclick="hapusKarakter('${data.key}')">
-Hapus
-</button>
-
-
-        </div>
-
-        `;
-
-
-    });
-
-
-    document.getElementById("statChar").innerText = jumlah;
-
-
-});
-// ===============================
-// DATABASE ORGANISASI ENGINE
-// ===============================
-
-
-// Simpan organisasi ke Firebase
-function simpanOrganisasi(){
-
-    let nama = document.getElementById("orgNama").value;
-    let sejarah = document.getElementById("orgSejarah").value;
-    let tujuan = document.getElementById("orgTujuan").value;
-    let anggota = document.getElementById("orgAnggota").value;
-
-
-    if(!sejarah.trim()){
-
-        alert("Sejarah organisasi wajib diisi!");
-        return;
-
-    }
-
-
-    database.ref("wiki/organisasi").push({
-
-        nama: nama,
-        sejarah: sejarah,
-        tujuan: tujuan,
-        anggota: anggota,
-        waktu: new Date().toLocaleString('id-ID')
-
-    }, error => {
-
-
-        if(!error){
-
-            alert("Organisasi berhasil disimpan!");
-
-            document.getElementById("orgSejarah").value="";
-            document.getElementById("orgTujuan").value="";
-            document.getElementById("orgAnggota").value="";
-
+        function hapusItem(node, key) {
+            if (confirm("Hapus data ini secara permanen dari server cloud?")) {
+                database.ref(`wiki/${node}/${key}`).remove();
+            }
         }
 
-
-    });
-
-
-}
-
-
-
-// Membaca database organisasi
-database.ref("wiki/organisasi").on("value", snapshot => {
-
-
-    const list = document.getElementById("list-organisasi");
-
-
-    if(!list) return;
-
-
-    list.innerHTML="";
-
-
-    snapshot.forEach(data=>{
-
-
-        let org = data.val();
-
-
-        list.innerHTML += `
-
-        <div class="card">
-
-
-            <h3>
-            ${org.nama}
-            </h3>
-
-
-            <p>
-            <b>Sejarah:</b><br>
-            ${org.sejarah}
-            </p>
-
-
-            <p>
-            <b>Tujuan:</b>
-            ${org.tujuan}
-            </p>
-
-
-            <p>
-            <b>Anggota Kunci:</b>
-            ${org.anggota}
-            </p>
-
-
-        </div>
-
-        `;
-
-
-    });
-
-
-});
-// ===============================
-// DATABASE LORE UMUM ENGINE
-// ===============================
-
-
-function tampilkanLore(node){
-
-    const list = document.getElementById("list-" + node);
-
-    if(!list) return;
-
-
-    database.ref("wiki/" + node).on("value", snapshot=>{
-
-
-        list.innerHTML="";
-
-
-        snapshot.forEach(data=>{
-
-
-            let item = data.val();
-
-
-            list.innerHTML += `
-
-            <div class="card">
-
-                <h3>${item.kategori}</h3>
-
-                <p>
-                ${item.konten}
-                </p>
-
-
-                <small>
-                ${item.waktu}
-                </small>
-
-
-            </div>
-
-            `;
-
-
-        });
-
-
-    });
-
-
-}
-
-
-// Aktifkan semua database lore
-
-[
-"canon",
-"dunia",
-"timeline",
-"power",
-"hubungan",
-"fakta",
-"changelog",
-"arsip"
-
-].forEach(item=>{
-
-    tampilkanLore(item);
-
-});
+        // AKTIFKAN SINKRONISASI OTOMATIS DATABASE UNTUK SEMUA TAB
+        susunanTab.forEach(tab => { if (tab.fields) pasangSinkronisasi(tab.id); });
     </script>
-
 </body>
-</html>
+                                                  </html>
