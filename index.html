@@ -414,3 +414,110 @@ database.ref("wiki/karakter").on("value", snapshot => {
 
 
 });
+// ===============================
+// DATABASE ORGANISASI ENGINE
+// ===============================
+
+
+// Simpan organisasi ke Firebase
+function simpanOrganisasi(){
+
+    let nama = document.getElementById("orgNama").value;
+    let sejarah = document.getElementById("orgSejarah").value;
+    let tujuan = document.getElementById("orgTujuan").value;
+    let anggota = document.getElementById("orgAnggota").value;
+
+
+    if(!sejarah.trim()){
+
+        alert("Sejarah organisasi wajib diisi!");
+        return;
+
+    }
+
+
+    database.ref("wiki/organisasi").push({
+
+        nama: nama,
+        sejarah: sejarah,
+        tujuan: tujuan,
+        anggota: anggota,
+        waktu: new Date().toLocaleString('id-ID')
+
+    }, error => {
+
+
+        if(!error){
+
+            alert("Organisasi berhasil disimpan!");
+
+            document.getElementById("orgSejarah").value="";
+            document.getElementById("orgTujuan").value="";
+            document.getElementById("orgAnggota").value="";
+
+        }
+
+
+    });
+
+
+}
+
+
+
+// Membaca database organisasi
+database.ref("wiki/organisasi").on("value", snapshot => {
+
+
+    const list = document.getElementById("list-organisasi");
+
+
+    if(!list) return;
+
+
+    list.innerHTML="";
+
+
+    snapshot.forEach(data=>{
+
+
+        let org = data.val();
+
+
+        list.innerHTML += `
+
+        <div class="card">
+
+
+            <h3>
+            ${org.nama}
+            </h3>
+
+
+            <p>
+            <b>Sejarah:</b><br>
+            ${org.sejarah}
+            </p>
+
+
+            <p>
+            <b>Tujuan:</b>
+            ${org.tujuan}
+            </p>
+
+
+            <p>
+            <b>Anggota Kunci:</b>
+            ${org.anggota}
+            </p>
+
+
+        </div>
+
+        `;
+
+
+    });
+
+
+});
