@@ -172,7 +172,19 @@
 
         // ENGINE SIMPAN KE CLOUD FIREBASE
         function simpanUmum(node, selId, txtId) {
-            let kat = document.getElementById(selId).value, isi = document.getElementById(txtId).value;
-            if(!isi.trim()) return alert("Isi data kosong!");
-            database.ref('wiki/' + node).push({ kategori: kat, konten: isi, waktu: new Date().toLocaleString('id-ID') }, err => {
-                if(!err) { alert("Sukses!"); document.getElementById(txtId).value =
+    let kat = document.getElementById(selId).value;
+    let isi = document.getElementById(txtId).value;
+
+    if(!isi.trim()) return alert("Isi data kosong!");
+
+    database.ref('wiki/' + node).push({
+        kategori: kat,
+        konten: isi,
+        waktu: new Date().toLocaleString('id-ID')
+    }, err => {
+        if(!err) { 
+            alert("Sukses!"); 
+            document.getElementById(txtId).value = "";
+        }
+    });
+         }
