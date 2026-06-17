@@ -241,6 +241,30 @@ database.ref("wiki/bab/" + id)
 }
 
 }
+        function editBab(id){
+
+database.ref("wiki/bab/" + id).once("value")
+.then(snapshot => {
+
+let bab = snapshot.val();
+
+document.getElementById("babNomor").value = bab.nomor;
+document.getElementById("babJudul").value = bab.judul;
+document.getElementById("babRingkasan").value = bab.ringkasan;
+document.getElementById("babChar").value = bab.karakter;
+document.getElementById("babEvent").value = bab.peristiwa;
+
+window.scrollTo({
+top:0,
+behavior:"smooth"
+});
+
+alert("Mode Edit Aktif. Ubah data lalu tekan Simpan.");
+
+});
+
+        }
+    
 
 
 // Membaca database bab
