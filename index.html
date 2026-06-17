@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📚 WIKI NOVEL MASTER DATABASE</title>
+    <title>📚 MULTI-WIKI NOVEL MASTER ENGINE</title>
     <link rel="stylesheet" href="style.css">
     <script>
         if (prompt("Masukkan Kata Sandi Master:") !== "MORPT") { alert("Salah!"); window.location.href = "https://github.com"; }
@@ -24,8 +24,14 @@
 
     <header>
         <h1>📚 WIKI NOVEL <span>MASTER ENGINE</span></h1>
-        <p>Proyek Eksklusif: Memulai Hidup Baru di Dunia Lain</p>
+        <p>Sistem Basis Data Multi-Project Manajemen Skenario Cerita</p>
     </header>
+
+    <div class="novel-selector-zone">
+        <label style="margin-bottom:0;">Pilih Novel Active:</label>
+        <select id="pilihNovel" class="novel-select" onchange="gantiNovelAktif()"></select>
+        <button onclick="tambahNovelBaru()" class="btn-primary" style="padding: 8px 12px; font-size: 0.8rem;">+ Tambah Novel</button>
+    </div>
 
     <div class="wiki-layout">
         <div class="nav-tabs" id="menuUtama"></div>
@@ -34,8 +40,8 @@
             <div id="tab-beranda" class="tab-content active">
                 <div class="card">
                     <h2>Status Proyek Utama</h2>
-                    <label>Judul Novel</label><input type="text" value="Memulai Hidup Baru di Dunia Lain" readonly>
-                    <label>Versi Canon Terbaru</label>
+                    <label>Judul Proyek Aktif</label><input type="text" id="judulAktifTeks" readonly>
+                    <label>Versi Skenario Cerita</label>
                     <div style="display: flex; gap: 10px;"><input type="text" id="metaVersi" placeholder="v1.0.0"><button onclick="updateMetaVersi()" class="btn-primary">Update</button></div>
                 </div>
                 <div class="card">
@@ -56,117 +62,117 @@
     </div>
 
     <script>
-        // CONFIGURASI FORM GENERATOR (Menulis Bebas & Hapus Semua Kategori Aktif)
+        let novelSekarang = ""; // Variabel global penampung id novel aktif
+
         const susunanTab = [
             { id: "beranda", nama: "BERANDA" },
             { id: "canon", nama: "CANON UTAMA", fields: [{id:"kategori", label:"Kategori / Topik"}, {id:"konten", label:"Uraian Isi Konten", tipe:"textarea"}] },
             { id: "karakter", nama: "KARAKTER", fields: [{id:"jenis", label:"Jenis Tokoh (Utama/Pendukung)"}, {id:"nama", label:"Nama Karakter"}, {id:"status", label:"Status (Hidup/Mati)"}, {id:"afiliasi", label:"Afiliasi / Fraksi"}, {id:"skill", label:"Kemampuan / Sihir"}, {id:"riwayat", label:"Riwayat / Latar Belakang", tipe:"textarea"}] },
-            { id: "organisasi", nama: "ORGANISASI", fields: [{id:"nama", label:"Nama Organisasi / Fraksi (Bebas Tulis)"}, {id:"tujuan", label:"Tujuan / Visi"}, {id:"anggota", label:"Anggota Kunci"}, {id:"sejarah", label:"Sejarah Berdiri", tipe:"textarea"}] },
+            { id: "organisasi", nama: "ORGANISASI", fields: [{id:"nama", label:"Nama Organisasi / Fraksi"}, {id:"tujuan", label:"Tujuan / Visi"}, {id:"anggota", label:"Anggota Kunci"}, {id:"sejarah", label:"Sejarah Berdiri", tipe:"textarea"}] },
             { id: "dunia", nama: "DUNIA & RAS", fields: [{id:"kategori", label:"Jenis (Lokasi/Ras/Sejarah)"}, {id:"konten", label:"Penjelasan Spesifikasi", tipe:"textarea"}] },
             { id: "timeline", nama: "TIMELINE", fields: [{id:"kategori", label:"Pembagian Plot Waktu"}, {id:"konten", label:"Ringkasan Kronologi Peristiwa", tipe:"textarea"}] },
             { id: "database_bab", nama: "DATABASE BAB", fields: [{id:"no", label:"Nomor Bab"}, {id:"judul", label:"Judul Bab Resmi"}, {id:"karakter", label:"Karakter yang Hadir"}, {id:"eventPenting", label:"Peristiwa Kunci"}, {id:"ringkasan", label:"Ringkasan Cerita", tipe:"textarea"}] },
-            { id: "power", nama: "SISTEM KEKUATAN", fields: [{id:"kategori", label:"Parameter Kekuatan / Elemen"}, {id:"konten", label:"Uraian Aturan Magic", tipe:"textarea"}] },
+            { id: "power", nama: "SISTEM KEKUATAN", fields: [{id:"kategori", label:"Parameter Kekuatan"}, {id:"konten", label:"Uraian Aturan Magic", tipe:"textarea"}] },
             { id: "hubungan", nama: "HUBUNGAN", fields: [{id:"kategori", label:"Jenis Hubungan Konten"}, {id:"konten", label:"Detail Interaksi Plot", tipe:"textarea"}] },
-            { id: "fakta", nama: "FAKTA PENTING", fields: [{id:"kategori", label:"Klasifikasi Fakta / Misteri"}, {id:"konten", label:"Uraian Fakta Kejadian", tipe:"textarea"}] },
+            { id: "fakta", nama: "FAKTA PENTING", fields: [{id:"kategori", label:"Klasifikasi Fakta"}, {id:"konten", label:"Uraian Fakta Kejadian", tipe:"textarea"}] },
             { id: "changelog", nama: "CHANGELOG", fields: [{id:"kategori", label:"Bagian yang Direvisi"}, {id:"konten", label:"Detail Perubahan Skenario", tipe:"textarea"}] },
             { id: "arsip", nama: "ARSIP IDE", fields: [{id:"kategori", label:"Kategori Ide Cadangan"}, {id:"konten", label:"Coretan Pikiran Kreatif", tipe:"textarea"}] }
         ];
 
-        // GENERATE MENU TAB & FORM INPUT KATEGORI
+        // RENDER TAB DAN FORM INPUT
         let htmlMenu = "", htmlForm = "";
         susunanTab.forEach((tab, idx) => {
-            // Perbaikan sistem klik menu menggunakan parameter index tombol (idx)
-            htmlMenu += `<button class="tab-btn ${idx===0?'active':''}" data-btn-id="${tab.id}" onclick="switchTab('${tab.id}', ${idx})">${tab.nama}</button>`;
+            htmlMenu += `<button class="tab-btn ${idx===0?'active':''}" onclick="switchTab('${tab.id}', ${idx})">${tab.nama}</button>`;
             if (tab.fields) {
-                let fieldsHtml = tab.fields.map(f => `
-                    <label>${f.label}</label>
-                    ${f.tipe==='textarea' ? `<textarea data-field="${f.id}" rows="4"></textarea>` : `<input type="text" data-field="${f.id}">`}
-                `).join('');
-                
-                htmlForm += `
-                    <div id="tab-${tab.id}" class="tab-content">
-                        <div class="card">
-                            <h2>${tab.nama}</h2>
-                            ${fieldsHtml}
-                            <button onclick="simpanData('${tab.id}')" class="btn-primary">Simpan Konten</button>
-                        </div>
-                        <div class="card"><h2>Arsip Data Terkunci</h2><div id="list-${tab.id}"></div></div>
-                    </div>`;
+                let fieldsHtml = tab.fields.map(f => `<label>${f.label}</label>${f.tipe==='textarea' ? `<textarea data-field="${f.id}" rows="4"></textarea>` : `<input type="text" data-field="${f.id}">`}`).join('');
+                htmlForm += `<div id="tab-${tab.id}" class="tab-content"><div class="card"><h2>${tab.nama}</h2>${fieldsHtml}<button onclick="simpanData('${tab.id}')" class="btn-primary">Simpan Konten</button></div><div class="card"><h2>Arsip Data Terkunci</h2><div id="list-${tab.id}"></div></div></div>`;
             }
         });
         document.getElementById("menuUtama").innerHTML = htmlMenu;
         document.getElementById("generatorForm").innerHTML = htmlForm;
 
-        // FUNGSI PERPINDAHAN TAB JAMINAN 100% WORK
         function switchTab(id, index) {
-            // Sembunyikan semua konten tab terlebih dahulu
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            
-            // Aktifkan konten tab yang dituju
+            document.querySelectorAll('.tab-content, .tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + id).classList.add('active');
-            
-            // Ambil elemen tombol berdasarkan index urutannya lalu nyalakan warna oranye
             const semuaTombol = document.querySelectorAll('.tab-btn');
-            if(semuaTombol[index]) {
-                semuaTombol[index].classList.add('active');
+            if(semuaTombol[index]) semuaTombol[index].classList.add('active');
+        }
+
+        // MANAGEMENT DAFTAR MULTI-NOVEL (CLOUD LISTENER)
+        database.ref('wiki_projek_list').on('value', snap => {
+            let list = snap.val(), html = "", selector = document.getElementById("pilihNovel");
+            if(!list) {
+                // Default jika database kosong pertama kali
+                database.ref('wiki_projek_list').push({ judul: "Memulai Hidup Baru di Dunia Lain" });
+                return;
+            }
+            Object.keys(list).forEach(key => { html += `<option value="${key}">${list[key].judul}</option>`; });
+            selector.innerHTML = html;
+            if(!novelSekarang) { novelSekarang = selector.value; jalankanEngineAplikasi(); }
+        });
+
+        function tambahNovelBaru() {
+            let nama = prompt("Masukkan Judul Novel Baru:");
+            if(nama && nama.trim()) {
+                database.ref('wiki_projek_list').push({ judul: nama.trim() }, err => { if(!err) alert("Novel baru berhasil didaftarkan!"); });
             }
         }
 
-        // FIREBASE CLOUD META VERSI ENGINE
-        database.ref('wiki/meta_versi').on('value', snap => {
-            let v = snap.val() || "v1.0.0";
-            document.getElementById("metaVersi").value = v; document.getElementById("statVersi").innerText = v;
-        });
-        function updateMetaVersi() { database.ref('wiki/meta_versi').set(document.getElementById("metaVersi").value, err => {!err && alert("Versi diperbarui!");}); }
+        function gantiNovelAktif() {
+            novelSekarang = document.getElementById("pilihNovel").value;
+            jalankanEngineAplikasi();
+        }
 
-        // ENGINE PENYIMPANAN DATA MASSAL GLOBAL
-        function simpanData(node) {
-            let container = document.getElementById(`tab-${node}`);
-            let inputs = container.querySelectorAll('[data-field]');
-            let dataBaru = { waktu: new Date().toLocaleString('id-ID') };
-            let valid = true;
+        // MENYALAKAN DATABASE LISTENER BERDASARKAN NOVEL YANG TERPILIH
+        function jalankanEngineAplikasi() {
+            let judulTeks = document.getElementById("pilihNovel").options[document.getElementById("pilihNovel").selectedIndex].text;
+            document.getElementById("judulAktifTeks").value = judulTeks;
 
-            inputs.forEach(input => {
-                let val = input.value.trim();
-                if (!val) valid = false;
-                dataBaru[input.getAttribute('data-field')] = val;
+            // Matikan dulu listener lama agar tidak tumpang tindih data
+            database.ref('wiki/' + novelSekarang).off();
+            
+            // Sync Meta Versi Novel Terpilih
+            database.ref(`wiki/${novelSekarang}/meta_versi`).on('value', snap => {
+                let v = snap.val() || "v1.0.0";
+                document.getElementById("metaVersi").value = v; document.getElementById("statVersi").innerText = v;
             });
 
-            if (!valid) return alert("Mohon isi semua kolom inputan terlebih dahulu!");
+            // Aktifkan Realtime Monitor untuk seluruh Tab Kategori khusus untuk Novel ini
+            susunanTab.forEach(tab => { if (tab.fields) pasangSinkronisasi(tab.id); });
+        }
 
-            database.ref('wiki/' + node).push(dataBaru, err => {
-                if (!err) {
-                    alert("Sukses tersimpan di Cloud Database!");
-                    inputs.forEach(input => input.value = "");
-                }
+        function updateMetaVersi() { database.ref(`wiki/${novelSekarang}/meta_versi`).set(document.getElementById("metaVersi").value, err => {!err && alert("Versi novel diupdate!");}); }
+
+        // ENGINE SIMPAN DENGAN PARAMETER ID NOVEL
+        function simpanData(node) {
+            let container = document.getElementById(`tab-${node}`), inputs = container.querySelectorAll('[data-field]');
+            let dataBaru = { waktu: new Date().toLocaleString('id-ID') }, valid = true;
+            inputs.forEach(i => { let val = i.value.trim(); if (!val) valid = false; dataBaru[i.getAttribute('data-field')] = val; });
+            if (!valid) return alert("Mohon lengkapi semua kolom!");
+
+            database.ref(`wiki/${novelSekarang}/${node}`).push(dataBaru, err => {
+                if (!err) { alert("Sukses menyimpan data novel!"); inputs.forEach(i => i.value = ""); }
             });
         }
 
-        // ENGINE REALTIME SYNC LISTENER & PENGHAPUSAN MASSAL
+        // ENGINE TAMPIL & HAPUS UNIVERSAL
         function pasangSinkronisasi(node) {
             let konfigurasi = susunanTab.find(t => t.id === node);
-            database.ref('wiki/' + node).on('value', snapshot => {
+            database.ref(`wiki/${novelSekarang}/${node}`).on('value', snapshot => {
                 let data = snapshot.val(), html = "", container = document.getElementById('list-' + node);
                 if (!data) { 
-                    container.innerHTML = "<p style='color:#71717a;'>Belum ada data terekam.</p>";
+                    container.innerHTML = "<p style='color:#71717a;'>Belum ada data terekam untuk judul novel ini.</p>";
                     if(node==='database_bab') document.getElementById("statBab").innerText = 0;
                     if(node==='karakter') document.getElementById("statChar").innerText = 0;
                     return; 
                 }
-
                 let keys = Object.keys(data);
                 if(node==='database_bab') document.getElementById("statBab").innerText = keys.length;
                 if(node==='karakter') document.getElementById("statChar").innerText = keys.length;
 
                 keys.forEach(key => {
-                    let item = data[key];
-                    html += `<div class="render-item">`;
-                    konfigurasi.fields.forEach(f => {
-                        if(item[f.id]) {
-                            html += `<div class="item-field"><b>${f.label}:</b> <span style="white-space:pre-wrap;">${item[f.id]}</span></div>`;
-                        }
-                    });
+                    let item = data[key]; html += `<div class="render-item">`;
+                    konfigurasi.fields.forEach(f => { if(item[f.id]) html += `<div class="item-field"><b>${f.label}:</b> <span style="white-space:pre-wrap;">${item[f.id]}</span></div>`; });
                     if(item.waktu) html += `<small style="color:#666; display:block; margin-top:5px;">Disimpan: ${item.waktu}</small>`;
                     html += `<div style="text-align:right; margin-top:10px;"><button class="btn-danger" onclick="hapusItem('${node}','${key}')">Hapus</button></div></div>`;
                 });
@@ -175,13 +181,8 @@
         }
 
         function hapusItem(node, key) {
-            if (confirm("Hapus data ini secara permanen dari server cloud?")) {
-                database.ref(`wiki/${node}/${key}`).remove();
-            }
+            if (confirm("Hapus data dari skenario novel ini?")) database.ref(`wiki/${novelSekarang}/${node}/${key}`).remove();
         }
-
-        // AKTIFKAN AUTO MONITORING SERVER UNTUK SEMUA TAB KATEGORI
-        susunanTab.forEach(tab => { if (tab.fields) pasangSinkronisasi(tab.id); });
     </script>
 </body>
 </html>
